@@ -34,7 +34,6 @@ class TicTacToe(Game):
 
     def evaluate_game_state(self, player):
         if self.current_winner:
-            # Las condiciones existentes se manejan aquí
             return 1 if (self.current_winner == player) else -1
         else:
             return 0
