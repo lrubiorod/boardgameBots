@@ -22,7 +22,9 @@ class MinimaxPlayer(BotPlayer):
             total_calls += n
             # print(f'Move:{move+1}-> score:{score}, n_moves:{n_moves}, acc_score:{acc_score}')
             game.undo_move(move)
-            if ((score > best_score) or (score == best_score and n_moves < min_moves) or
+            if ((score > best_score) or
+                    (score == best_score and score >= 0 and n_moves < min_moves) or
+                    (score == best_score and score < 0 and n_moves > min_moves) or
                     (score == best_score and n_moves == min_moves and acc_score > best_acc_score)):
                 best_score = score
                 best_acc_score = acc_score

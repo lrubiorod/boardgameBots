@@ -75,11 +75,11 @@ def setup_players():
 
     if player1_type != 'human':
         if player1_type == 'minimax':
-            player1 = MinimaxPlayer(depth_limit=7, player=1)
+            player1 = MinimaxPlayer(player=1)
 
     if player2_type != 'human':
         if player2_type == 'minimax':
-            player2 = MinimaxPlayer(depth_limit=7, player=2)
+            player2 = MinimaxPlayer(player=2)
 
     return player1, player2
 
