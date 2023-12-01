@@ -47,24 +47,39 @@ def get_player_move(game, turn):
 
 def choose_game():
     while True:
-        choice = int(input("Which game would you like to play?\n 1: TicTacToe\n 2: Connect4\n"))
-        if choice == 1:
-            return TicTacToe()
-        elif choice == 2:
-            return ConnectFour()
-        else:
-            print("Invalid choice. Please try again.")
+        try:
+            choice = int(input("Which game would you like to play?\n 1: TicTacToe\n 2: Connect4\n"))
+            if choice == 1:
+                return TicTacToe()
+            elif choice == 2:
+                return ConnectFour()
+            else:
+                print("Invalid choice. Please try again.")
+        except ValueError:
+            print("Write a valid number please!")
 
 
 def choose_player_type(player_number):
     while True:
-        choice = int(input(f"Choose the type of player {player_number}:\n 1: Human\n 2: Minimax\n"))
-        if choice == 1:
-            return 'human'
-        elif choice == 2:
-            return 'minimax'
-        else:
-            print("Invalid choice. Please try again.")
+        try:
+            choice = int(input(f"Choose the type of player {player_number}:\n 1: Human\n 2: Minimax\n"))
+            if choice == 1:
+                return 'human'
+            elif choice == 2:
+                return 'minimax'
+            else:
+                print("Invalid choice. Please try again.")
+        except ValueError:
+            print("Write a valid number please!")
+
+
+def choose_depth():
+    while True:
+        try:
+            return int(input(f"Choose maximum depth in your algorithm"))
+
+        except ValueError:
+            print("Write a valid number please!")
 
 
 def setup_players():
@@ -75,11 +90,13 @@ def setup_players():
 
     if player1_type != 'human':
         if player1_type == 'minimax':
-            player1 = MinimaxPlayer(player=1)
+            depth_limit = choose_depth()
+            player1 = MinimaxPlayer(depth_limit, player=1)
 
     if player2_type != 'human':
         if player2_type == 'minimax':
-            player2 = MinimaxPlayer(player=2)
+            depth_limit = choose_depth()
+            player2 = MinimaxPlayer(depth_limit, player=2)
 
     return player1, player2
 
