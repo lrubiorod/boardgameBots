@@ -27,7 +27,7 @@ class TicTacToe(Game):
         self.current_winner = None
 
     def get_available_moves(self):
-        return [i for i, spot in enumerate(self.board) if spot == ' ']
+        return [i for i in [4, 0, 2, 6, 8, 1, 3, 5, 7] if self.board[i] == ' ']
 
     def is_game_over(self):
         return self.current_winner is not None or not self.empty_squares()

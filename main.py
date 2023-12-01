@@ -1,6 +1,7 @@
 from games.tictactoe import TicTacToe
 from games.connect4 import ConnectFour
 from strategies.minimax import MinimaxPlayer
+from strategies.alphabeta import AlphaBetaPlayer
 
 
 def main():
@@ -62,21 +63,23 @@ def choose_game():
 def choose_player_type(player_number):
     while True:
         try:
-            choice = int(input(f"Choose the type of player {player_number}:\n 1: Human\n 2: Minimax\n"))
+            choice = int(input(f"Choose the type of player {player_number}:\n 1: Human\n 2: Minimax\n 3: AlphaBeta\n"))
             if choice == 1:
                 return 'human'
             elif choice == 2:
                 return 'minimax'
+            elif choice == 3:
+                return 'alphabeta'
             else:
                 print("Invalid choice. Please try again.")
         except ValueError:
             print("Write a valid number please!")
 
 
-def choose_depth():
+def choose_depth(player):
     while True:
         try:
-            return int(input(f"Choose maximum depth in your algorithm"))
+            return int(input(f"Choose maximum depth in your algorithm for Player {player}: "))
 
         except ValueError:
             print("Write a valid number please!")
@@ -90,13 +93,19 @@ def setup_players():
 
     if player1_type != 'human':
         if player1_type == 'minimax':
-            depth_limit = choose_depth()
+            depth_limit = choose_depth(1)
             player1 = MinimaxPlayer(depth_limit, player=1)
+        elif player1_type == 'alphabeta':
+            depth_limit = choose_depth(1)
+            player1 = AlphaBetaPlayer(depth_limit, player=1)
 
     if player2_type != 'human':
         if player2_type == 'minimax':
-            depth_limit = choose_depth()
+            depth_limit = choose_depth(2)
             player2 = MinimaxPlayer(depth_limit, player=2)
+        elif player2_type == 'alphabeta':
+            depth_limit = choose_depth(2)
+            player2 = AlphaBetaPlayer(depth_limit, player=2)
 
     return player1, player2
 

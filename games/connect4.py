@@ -50,8 +50,7 @@ class ConnectFour(Game):
         return False
 
     def get_available_moves(self):
-        available_moves = [i for i in range(7) if self.board[0][i] == ' ']
-        return [i for i in range(7) if self.board[0][i] == ' ']
+        return [i for i in [3, 2, 4, 1, 5, 0, 6] if self.board[0][i] == ' ']
 
     def is_game_over(self):
         return self.current_winner is not None or all(self.board[0][i] != ' ' for i in range(7))
