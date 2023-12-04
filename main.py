@@ -1,3 +1,5 @@
+import time
+
 from games.tictactoe import TicTacToe
 from games.connect4 import ConnectFour
 from strategies.minimax import MinimaxPlayer
@@ -7,6 +9,8 @@ from strategies.alphabeta import AlphaBetaPlayer
 def main():
     game = choose_game()
     player1, player2 = setup_players()
+    duration_player_1 = 0
+    duration_player_2 = 0
 
     turn = 1
 
@@ -16,13 +20,26 @@ def main():
         current_player = player1 if turn == 1 else player2
 
         if current_player == 'human':
+            start_time = time.time()
             move = get_player_move(game, turn)
+            end_time = time.time()
+            duration = end_time - start_time
+
             game.make_move(move, turn)
         else:
             print(f'Move Player {turn} ({current_player.algorithm_name()}): ')
+            start_time = time.time()
             move, n = current_player.choose_move(game)
-            print(f'{current_player.algorithm_name()} strategy used {n} iterations')
+            end_time = time.time()
+            duration = end_time - start_time
+
+            print(f'{current_player.algorithm_name()} strategy used {n} iterations and took {duration:.6f} seconds')
             game.make_move(move, turn)
+
+        if turn == 1:
+            duration_player_1 += duration
+        else:
+            duration_player_2 += duration
 
         if game.is_game_over():
             game.print_board()
@@ -30,6 +47,9 @@ def main():
                 print(f'Player {game.current_winner} won!')
             else:
                 print("Its a tie!")
+
+            print(f'Player 1 time: {duration_player_1:.6f}')
+            print(f'Player 2 time: {duration_player_2:.6f}')
             break
 
         turn = 2 if turn == 1 else 1
