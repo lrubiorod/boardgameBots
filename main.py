@@ -4,11 +4,14 @@ from games.tictactoe import TicTacToe
 from games.connect4 import ConnectFour
 from strategies.minimax import MinimaxPlayer
 from strategies.alphabeta import AlphaBetaPlayer
+from strategies.mcts import MCTSPlayer
 
 
 def main():
     game = choose_game()
-    player1, player2 = setup_players()
+    player1 = choose_player_type(1)
+    player2 = choose_player_type(2)
+
     duration_player_1 = 0
     duration_player_2 = 0
 
@@ -83,51 +86,36 @@ def choose_game():
 def choose_player_type(player_number):
     while True:
         try:
-            choice = int(input(f"Choose the type of player {player_number}:\n 1: Human\n 2: Minimax\n 3: AlphaBeta\n"))
+            choice = int(input(f"Choose the type of player {player_number}:\n 1: Human\n 2: Minimax\n 3: AlphaBeta\n "
+                               f"4: MTCS\n"))
             if choice == 1:
+                # Human Player
                 return 'human'
             elif choice == 2:
-                return 'minimax'
+                # Minimax Player
+                depth_limit = choose_depth_or_time(player_number)
+                return MinimaxPlayer(depth_limit, player=player_number)
             elif choice == 3:
-                return 'alphabeta'
+                # AlphaBeta Player
+                depth_limit = choose_depth_or_time(player_number)
+                return AlphaBetaPlayer(depth_limit, player=player_number)
+            elif choice == 4:
+                # MCTS Player
+                time_limit = choose_depth_or_time(player_number, 'time')
+                return MCTSPlayer(time_limit, player=player_number)
             else:
                 print("Invalid choice. Please try again.")
         except ValueError:
             print("Write a valid number please!")
 
 
-def choose_depth(player):
+def choose_depth_or_time(player, n='depth'):
     while True:
         try:
-            return int(input(f"Choose maximum depth in your algorithm for Player {player}: "))
+            return int(input(f"Choose maximum {n} in your algorithm for Player {player}: "))
 
         except ValueError:
             print("Write a valid number please!")
-
-
-def setup_players():
-    player1 = 'human'
-    player2 = 'human'
-    player1_type = choose_player_type(1)
-    player2_type = choose_player_type(2)
-
-    if player1_type != 'human':
-        if player1_type == 'minimax':
-            depth_limit = choose_depth(1)
-            player1 = MinimaxPlayer(depth_limit, player=1)
-        elif player1_type == 'alphabeta':
-            depth_limit = choose_depth(1)
-            player1 = AlphaBetaPlayer(depth_limit, player=1)
-
-    if player2_type != 'human':
-        if player2_type == 'minimax':
-            depth_limit = choose_depth(2)
-            player2 = MinimaxPlayer(depth_limit, player=2)
-        elif player2_type == 'alphabeta':
-            depth_limit = choose_depth(2)
-            player2 = AlphaBetaPlayer(depth_limit, player=2)
-
-    return player1, player2
 
 
 if __name__ == "__main__":

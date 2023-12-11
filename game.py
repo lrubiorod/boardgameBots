@@ -25,3 +25,11 @@ class Game(ABC):
     @abstractmethod
     def print_board(self):
         pass
+
+    @abstractmethod
+    def copy(self):
+        pass
+
+    @abstractmethod
+    def next_player(self, player):
+        pass

@@ -6,6 +6,12 @@ class ConnectFour(Game):
         self.board = [[' ' for _ in range(7)] for _ in range(6)]
         self.current_winner = None
 
+    def copy(self):
+        new_game = ConnectFour()
+        new_game.board = [row[:] for row in self.board]
+        new_game.current_winner = self.current_winner
+        return new_game
+
     def print_board(self):
         print(' 1 2 3 4 5 6 7')
         for row in self.board:
@@ -62,3 +68,9 @@ class ConnectFour(Game):
             return 1 if self.current_winner == player else -1
         else:
             return 0
+
+    def next_player(self, player):
+        if player == 1:
+            return 2
+        else:
+            return 1

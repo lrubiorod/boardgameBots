@@ -6,6 +6,12 @@ class TicTacToe(Game):
         self.board = [' ' for _ in range(9)]
         self.current_winner = None
 
+    def copy(self):
+        new_game = TicTacToe()
+        new_game.board = self.board[:]
+        new_game.current_winner = self.current_winner
+        return new_game
+
     def print_board(self):
         print('***************')
         for row in range(3):
@@ -51,3 +57,9 @@ class TicTacToe(Game):
 
     def empty_squares(self):
         return ' ' in self.board
+
+    def next_player(self, player):
+        if player == 1:
+            return 2
+        else:
+            return 1

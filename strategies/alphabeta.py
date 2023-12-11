@@ -47,7 +47,7 @@ class AlphaBetaPlayer(BotPlayer):
         else:
             min_eval = float('inf')
             for move in game.get_available_moves():
-                game.make_move(move, 1 if self.player == 2 else 2)
+                game.make_move(move, game.next_player(self.player))
                 eval_score, n = self.alphabeta(game, depth + 1, True, alpha, beta)
                 n_calls += n
                 game.undo_move(move)

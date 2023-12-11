@@ -57,7 +57,7 @@ class MinimaxPlayer(BotPlayer):
             best_score = float('inf')
             min_moves = float('inf')
             for move in game.get_available_moves():
-                game.make_move(move, 1 if self.player == 2 else 2)
+                game.make_move(move, game.next_player(self.player))
                 score, acc, n_moves, n = self.minimax(game, depth + 1, True)
                 n_calls += n
                 acc_score += acc
