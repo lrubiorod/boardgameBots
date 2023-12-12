@@ -82,8 +82,7 @@ class MCTSPlayer(BotPlayer):
 
         for child in root.children:
             win_visit_ratio = child.wins / child.visits if child.visits > 0 else 0
-            print(
-                f"Move: {child.move}, Win/Visit Ratio: {win_visit_ratio:0.4f}, Visits: {child.visits}, ")
+            print(f"Move: {child.move}, Win/Visit Ratio: {win_visit_ratio:0.4f}, Visits: {child.visits}, ")
 
         best_move = root.best_child(c_param=0).move
         return best_move, root.visits

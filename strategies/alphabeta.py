@@ -18,7 +18,7 @@ class AlphaBetaPlayer(BotPlayer):
         for move in game.get_available_moves():
             game.make_move(move)
             score, n_calls = self.alphabeta(game, 0, False, alpha, beta)
-            # print(f'Move:{move+1}-> score:{score}')
+            # print(f'Move:{move}-> score:{score}')
             total_calls += n_calls
             game.undo_move()
             if score > alpha:

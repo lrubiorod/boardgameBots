@@ -37,3 +37,7 @@ class Game(ABC):
     @abstractmethod
     def get_winner(self):
         pass
+
+    @abstractmethod
+    def game_name(self):
+        pass

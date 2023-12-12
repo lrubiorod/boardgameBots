@@ -8,6 +8,9 @@ class TicTacToe(Game):
         self.winner = None
         self.previous_state = None
 
+    def game_name(self):
+        return "TicTacToe"
+
     def get_current_player(self):
         return self.current_player
 
