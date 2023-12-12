@@ -17,7 +17,7 @@ class MinimaxPlayer(BotPlayer):
         total_calls = 0
 
         for move in game.get_available_moves():
-            game.make_move(move, self.player)
+            game.make_move(move)
             score, acc_score, n_moves, n = self.minimax(game, 0, False)
             total_calls += n
             # print(f'Move:{move+1}-> score:{score}, n_moves:{n_moves}, acc_score:{acc_score}')
@@ -44,7 +44,7 @@ class MinimaxPlayer(BotPlayer):
             best_score = float('-inf')
             min_moves = float('inf')
             for move in game.get_available_moves():
-                game.make_move(move, self.player)
+                game.make_move(move)
                 score, acc, n_moves, n = self.minimax(game, depth + 1, False)
                 n_calls += n
                 acc_score += acc
@@ -57,7 +57,7 @@ class MinimaxPlayer(BotPlayer):
             best_score = float('inf')
             min_moves = float('inf')
             for move in game.get_available_moves():
-                game.make_move(move, game.next_player(self.player))
+                game.make_move(move)
                 score, acc, n_moves, n = self.minimax(game, depth + 1, True)
                 n_calls += n
                 acc_score += acc

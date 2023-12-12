@@ -57,12 +57,12 @@ class MCTSPlayer(BotPlayer):
             while node.is_fully_expanded() and not node.game_state.is_game_over():
                 node = node.best_child()
                 first_expansion = False
-                temp_game.make_move(node.move, self.player)
+                temp_game.make_move(node.move)
 
             # Expansion
             if not node.is_fully_expanded():
                 move = random.choice(node.untried_moves)
-                temp_game.make_move(move, self.player)
+                temp_game.make_move(move)
 
                 # Handle case win with 1 movement
                 if first_expansion and (temp_game.evaluate_game_state(self.player) == 1):
@@ -71,11 +71,8 @@ class MCTSPlayer(BotPlayer):
                 node = node.add_child(move, temp_game)
 
             # Simulation
-            next_player = game.next_player(self.player)
             while not temp_game.is_game_over():
-                random_move = random.choice(temp_game.get_available_moves())
-                temp_game.make_move(random_move, next_player)
-                next_player = game.next_player(next_player)
+                temp_game.make_move(random.choice(temp_game.get_available_moves()))
 
             # Backpropagation
             while node is not None:

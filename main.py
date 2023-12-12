@@ -9,59 +9,52 @@ from strategies.mcts import MCTSPlayer
 
 def main():
     game = choose_game()
-    player1 = choose_player_type(1)
-    player2 = choose_player_type(2)
-
-    duration_player_1 = 0
-    duration_player_2 = 0
-
-    turn = 1
+    players = [choose_player_type(1), choose_player_type(2)]
+    player_duration = [0] * len(players)
 
     while not game.is_game_over():
         game.print_board()
 
-        current_player = player1 if turn == 1 else player2
+        turn = game.get_current_player()
+        player = players[turn - 1]
 
-        if current_player == 'human':
+        if player == 'human':
             start_time = time.time()
-            move = get_player_move(game, turn)
+            move = get_player_move(game)
             end_time = time.time()
             duration = end_time - start_time
 
-            game.make_move(move, turn)
+            game.make_move(move)
         else:
-            print(f'Move Player {turn} ({current_player.algorithm_name()}): ')
+            print(f'Move Player {turn} ({player.algorithm_name()}): ')
             start_time = time.time()
-            move, n = current_player.choose_move(game)
+            move, n = player.choose_move(game)
             end_time = time.time()
             duration = end_time - start_time
 
-            print(f'{current_player.algorithm_name()} strategy used {n} iterations and took {duration:.6f} seconds')
-            game.make_move(move, turn)
+            print(f'{player.algorithm_name()} strategy used {n} iterations and took {duration:.6f} seconds')
+            game.make_move(move)
 
-        if turn == 1:
-            duration_player_1 += duration
-        else:
-            duration_player_2 += duration
+        player_duration[turn - 1] += duration
 
         if game.is_game_over():
             game.print_board()
-            if game.current_winner:
-                print(f'Player {game.current_winner} won!')
+            winner = game.get_winner()
+            if winner:
+                print(f'Player {winner} won!')
             else:
                 print("Its a tie!")
 
-            print(f'Player 1 time: {duration_player_1:.6f}')
-            print(f'Player 2 time: {duration_player_2:.6f}')
+            for i, duration in enumerate(player_duration):
+                print(f'Player {i +1} time: {duration:.6f}')
+
             break
 
-        turn = 2 if turn == 1 else 1
 
-
-def get_player_move(game, turn):
+def get_player_move(game):
     while True:
         try:
-            move = int(input(f'Move Player {turn}: ')) - 1
+            move = int(input(f'Move Player {game.get_current_player()}: ')) - 1
             if move in game.get_available_moves():
                 return move
             print("Invalid movement. Try again!")

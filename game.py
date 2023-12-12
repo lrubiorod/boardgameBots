@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class Game(ABC):
     @abstractmethod
-    def make_move(self, move, player):
+    def make_move(self, move):
         pass
 
     @abstractmethod
@@ -31,5 +31,9 @@ class Game(ABC):
         pass
 
     @abstractmethod
-    def next_player(self, player):
+    def get_current_player(self):
+        pass
+
+    @abstractmethod
+    def get_winner(self):
         pass

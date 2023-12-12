@@ -16,7 +16,7 @@ class AlphaBetaPlayer(BotPlayer):
         total_calls = 0
 
         for move in game.get_available_moves():
-            game.make_move(move, self.player)
+            game.make_move(move)
             score, n_calls = self.alphabeta(game, 0, False, alpha, beta)
             # print(f'Move:{move+1}-> score:{score}')
             total_calls += n_calls
@@ -35,7 +35,7 @@ class AlphaBetaPlayer(BotPlayer):
         if is_maximizing_player:
             max_eval = float('-inf')
             for move in game.get_available_moves():
-                game.make_move(move, self.player)
+                game.make_move(move)
                 eval_score, n = self.alphabeta(game, depth + 1, False, alpha, beta)
                 n_calls += n
                 game.undo_move(move)
@@ -47,7 +47,7 @@ class AlphaBetaPlayer(BotPlayer):
         else:
             min_eval = float('inf')
             for move in game.get_available_moves():
-                game.make_move(move, game.next_player(self.player))
+                game.make_move(move)
                 eval_score, n = self.alphabeta(game, depth + 1, True, alpha, beta)
                 n_calls += n
                 game.undo_move(move)
