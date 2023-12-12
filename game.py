@@ -7,7 +7,7 @@ class Game(ABC):
         pass
 
     @abstractmethod
-    def undo_move(self, move):
+    def undo_move(self):
         pass
 
     @abstractmethod

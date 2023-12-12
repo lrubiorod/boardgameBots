@@ -6,6 +6,7 @@ class TicTacToe(Game):
         self.board = [' ' for _ in range(9)]
         self.current_player = 1
         self.winner = None
+        self.previous_state = None
 
     def get_current_player(self):
         return self.current_player
@@ -18,6 +19,7 @@ class TicTacToe(Game):
         new_game.board = self.board[:]
         new_game.current_player = self.current_player
         new_game.winner = self.winner
+        new_game.previous_state = self.previous_state
         return new_game
 
     def print_board(self):
@@ -29,6 +31,7 @@ class TicTacToe(Game):
         """Makes a move on the board. Marks the square with 'X' for first player and 'O' for second player."""
         letter = 'X' if self.current_player == 1 else 'O'
         if self.board[move] == ' ':
+            self.previous_state = self.copy()
             self.board[move] = letter
             if self.check_winner(move, letter):
                 self.winner = self.current_player
@@ -37,11 +40,14 @@ class TicTacToe(Game):
             return True
         return False
 
-    def undo_move(self, move):
+    def undo_move(self):
         """Reverts a move on the board."""
-        self.board[move] = ' '
-        self.winner = None
-        self.current_player = self.next_player()
+        previous_state = self.previous_state.copy()
+        if previous_state:
+            self.board = previous_state.board
+            self.current_player = previous_state.current_player
+            self.winner = previous_state.winner
+            self.previous_state = previous_state.previous_state
 
     def get_available_moves(self):
         return [i for i in [4, 0, 2, 6, 8, 1, 3, 5, 7] if self.board[i] == ' ']

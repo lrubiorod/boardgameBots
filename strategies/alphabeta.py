@@ -20,7 +20,7 @@ class AlphaBetaPlayer(BotPlayer):
             score, n_calls = self.alphabeta(game, 0, False, alpha, beta)
             # print(f'Move:{move+1}-> score:{score}')
             total_calls += n_calls
-            game.undo_move(move)
+            game.undo_move()
             if score > alpha:
                 alpha = score
                 best_move = move
@@ -38,7 +38,7 @@ class AlphaBetaPlayer(BotPlayer):
                 game.make_move(move)
                 eval_score, n = self.alphabeta(game, depth + 1, False, alpha, beta)
                 n_calls += n
-                game.undo_move(move)
+                game.undo_move()
                 max_eval = max(max_eval, eval_score)
                 alpha = max(alpha, eval_score)
                 if beta <= alpha:
@@ -50,7 +50,7 @@ class AlphaBetaPlayer(BotPlayer):
                 game.make_move(move)
                 eval_score, n = self.alphabeta(game, depth + 1, True, alpha, beta)
                 n_calls += n
-                game.undo_move(move)
+                game.undo_move()
                 min_eval = min(min_eval, eval_score)
                 beta = min(beta, eval_score)
                 if beta <= alpha:

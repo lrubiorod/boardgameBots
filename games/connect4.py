@@ -6,6 +6,7 @@ class ConnectFour(Game):
         self.board = [[' ' for _ in range(7)] for _ in range(6)]
         self.current_player = 1
         self.winner = None
+        self.previous_state = None
 
     def get_current_player(self):
         return self.current_player
@@ -18,6 +19,7 @@ class ConnectFour(Game):
         new_game.board = [row[:] for row in self.board]
         new_game.current_player = self.current_player
         new_game.winner = self.winner
+        new_game.previous_state = self.previous_state
         return new_game
 
     def print_board(self):
@@ -34,6 +36,7 @@ class ConnectFour(Game):
         if self.board[0][column] != ' ':
             return False
 
+        self.previous_state = self.copy()
         row = next(row for row in reversed(self.board) if row[column] == ' ')
         row[column] = 'X' if player == 1 else 'O'
 
@@ -43,15 +46,14 @@ class ConnectFour(Game):
         self.current_player = self.next_player()
         return True
 
-    def undo_move(self, move):
-        column = move
-        for row in self.board:
-            if row[column] != ' ':
-                row[column] = ' '
-                break
-
-        self.current_player = self.next_player()
-        self.winner = None
+    def undo_move(self):
+        """Reverts a move on the board."""
+        previous_state = self.previous_state.copy()
+        if self.previous_state:
+            self.board = previous_state.board
+            self.current_player = previous_state.current_player
+            self.winner = previous_state.winner
+            self.previous_state = previous_state.previous_state
 
     def check_winner(self, column, row, player):
         letter = 'X' if player == 1 else 'O'

@@ -21,7 +21,7 @@ class MinimaxPlayer(BotPlayer):
             score, acc_score, n_moves, n = self.minimax(game, 0, False)
             total_calls += n
             # print(f'Move:{move+1}-> score:{score}, n_moves:{n_moves}, acc_score:{acc_score}')
-            game.undo_move(move)
+            game.undo_move()
             if ((score > best_score) or
                     (score == best_score and score >= 0 and n_moves < min_moves) or
                     (score == best_score and score < 0 and n_moves > min_moves) or
@@ -48,7 +48,7 @@ class MinimaxPlayer(BotPlayer):
                 score, acc, n_moves, n = self.minimax(game, depth + 1, False)
                 n_calls += n
                 acc_score += acc
-                game.undo_move(move)
+                game.undo_move()
                 if score > best_score or (score == best_score and n_moves < min_moves):
                     best_score = score
                     min_moves = n_moves
@@ -61,7 +61,7 @@ class MinimaxPlayer(BotPlayer):
                 score, acc, n_moves, n = self.minimax(game, depth + 1, True)
                 n_calls += n
                 acc_score += acc
-                game.undo_move(move)
+                game.undo_move()
                 if score < best_score or (score == best_score and n_moves < min_moves):
                     best_score = score
                     min_moves = n_moves
