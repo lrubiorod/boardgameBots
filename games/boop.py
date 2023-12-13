@@ -42,15 +42,46 @@ class Boop(Game):
             return False
 
         self.previous_state = self.copy()
+
+        shifted_pieces = self.shift_adjacent_pieces(row, col)
+
         self.board[row][col] = current_player_letter
         self.pieces_count[current_player_letter] += 1
 
-        if self.check_winner(move, current_player_letter):
-            self.winner = self.current_player
+        shifted_pieces.append([row, col])
+        for m in shifted_pieces:
+            winner = self.check_winner(m)
+            if winner:
+                self.winner = 1 if winner == 'a' else 2
 
         self.current_player = 2 if self.current_player == 1 else 1
 
         return True
+
+    def shift_adjacent_pieces(self, row, col):
+        shifted_pieces = []
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+        for dr, dc in directions:
+            adj_row, adj_col = row + dr, col + dc
+            if 0 <= adj_row < 6 and 0 <= adj_col < 6 and self.board[adj_row][adj_col] != ' ':
+                new_position = self.shift_piece(adj_row, adj_col, dr, dc)
+                if new_position:
+                    shifted_pieces.append(new_position)
+        return shifted_pieces
+
+    def shift_piece(self, row, col, dr, dc):
+        target_row, target_col = row + dr, col + dc
+        if not (0 <= target_row < 6 and 0 <= target_col < 6):
+            fallen_piece = self.board[row][col]
+            self.board[row][col] = ' '
+            if fallen_piece in self.pieces_count:
+                self.pieces_count[fallen_piece] -= 1
+        elif self.board[target_row][target_col] == ' ':
+            self.board[target_row][target_col] = self.board[row][col]
+            self.board[row][col] = ' '
+            return [target_row, target_col]
+
+        return None
 
     def undo_move(self):
         """Reverts a move on the board."""
@@ -62,19 +93,23 @@ class Boop(Game):
             self.previous_state = previous_state.previous_state
             self.pieces_count = previous_state.pieces_count
 
-    def check_winner(self, last_move, letter):
+    def check_winner(self, last_move):
         """Checks if the last move leads to a win."""
         row, col = last_move
         max_count = 3
+        letter = self.board[row][col]
+
+        if letter == ' ':
+            return None
 
         if self.pieces_count[letter] == 8:
-            return True
+            return letter
 
         if self.check_line_winner(row, max(col - (max_count - 1), 0), 0, 1, letter, max_count):
-            return True
+            return letter
 
         if self.check_line_winner(max(row - (max_count - 1), 0), col, 1, 0, letter, max_count):
-            return True
+            return letter
 
         for dr, dc in [(1, 1), (1, -1)]:
             start_row = row
@@ -84,9 +119,9 @@ class Boop(Game):
                     start_row -= dr
                     start_col -= dc
             if self.check_line_winner(start_row, start_col, dr, dc, letter, max_count):
-                return True
+                return letter
 
-        return False
+        return None
 
     def check_line_winner(self, start_row, start_col, delta_row, delta_col, letter, max_count):
         """Checks a line for a winning condition."""
