@@ -54,7 +54,7 @@ class MCTSPlayer(BotPlayer):
             first_expansion = True
 
             # Selection
-            while node.is_fully_expanded() and not node.game_state.is_game_over():
+            while node.is_fully_expanded() and not temp_game.is_game_over():
                 node = node.best_child()
                 first_expansion = False
                 temp_game.make_move(node.move)
