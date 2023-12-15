@@ -6,6 +6,7 @@ from games.boop import Boop
 from strategies.minimax import MinimaxPlayer
 from strategies.alphabeta import AlphaBetaPlayer
 from strategies.mcts import MCTSPlayer
+from strategies.mcts_solver import MCTSSolverPlayer
 
 
 def main():
@@ -100,7 +101,7 @@ def choose_player_type(player_number):
     while True:
         try:
             choice = int(input(f"Choose the type of player {player_number}:\n 1: Human\n 2: Minimax\n 3: AlphaBeta\n "
-                               f"4: MTCS\n"))
+                               f"4: MTCS\n 5: MTCS-Solver\n"))
             if choice == 1:
                 # Human Player
                 return 'human'
@@ -116,6 +117,10 @@ def choose_player_type(player_number):
                 # MCTS Player
                 time_limit = choose_depth_or_time(player_number, 'time')
                 return MCTSPlayer(time_limit, player=player_number)
+            elif choice == 5:
+                # MCTS Player
+                time_limit = choose_depth_or_time(player_number, 'time')
+                return MCTSSolverPlayer(time_limit, player=player_number)
             else:
                 print("Invalid choice. Please try again.")
         except ValueError:
