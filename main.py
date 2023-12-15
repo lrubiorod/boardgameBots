@@ -71,7 +71,7 @@ def get_player_move(game):
                 else:
                     print("Invalid input. Please enter two digits.")
             else:
-                move = int(user_input) - 1
+                move = int(user_input)
 
             if move in game.get_available_moves():
                 return move
