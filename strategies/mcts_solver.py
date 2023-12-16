@@ -131,13 +131,20 @@ class MCTSSolverPlayer(BotPlayer):
 
                 node = node.parent
 
-        # for child in root.children:
-        #    if child.result is None:
-        #        win_visit_ratio = child.wins / child.visits if child.visits > 0 else 0
-        #        ratio = f"Win/Visit Ratio: {win_visit_ratio:0.4f}"
-        #    else:
-        #        ratio = f"Result Achieved: {child.result}"
-        #    print(f"Move: {child.move}, {ratio}, Visits: {child.visits}, ")
+        # print_debug(root)
 
         best_move = root.best_child(c_param=0).move
         return best_move, root.visits
+
+
+def print_debug(node):
+    for child in node.children:
+        if child.result == MCTSNode.WIN:
+            ratio = "Result Achieved: WIN"
+        elif child.result == MCTSNode.LOSE:
+            ratio = "Result Achieved: LOSE"
+        else:
+            win_visit_ratio = child.wins / child.visits if child.visits > 0 else 0
+            ratio = f"Win/Visit Ratio: {win_visit_ratio:0.4f}"
+
+        print(f"Move: {child.move}, {ratio}, Visits: {child.visits}, ")
