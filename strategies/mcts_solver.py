@@ -6,6 +6,10 @@ from botPlayer import BotPlayer
 
 
 class MCTSNode:
+    WIN = 10
+    LOSE = -10
+    DRAW = 0
+
     def __init__(self, game_state, parent=None, move=None, is_alpha=True):
         self.game_state = game_state
         self.parent = parent
@@ -66,18 +70,18 @@ class MCTSNode:
             else:
                 if self.is_alpha:
                     best_child_result = max(best_child_result, child.result)
-                    if child.result == 10:
-                        self.result = 10
+                    if child.result == MCTSNode.WIN:
+                        self.result = MCTSNode.WIN
                         return
                 else:
                     best_child_result = min(best_child_result, child.result)
-                    if child.result == -10:
-                        self.result = -10
+                    if child.result == MCTSNode.LOSE:
+                        self.result = MCTSNode.LOSE
                         return
 
         if self.is_fully_expanded():
             if self.parent is None and none_counter == 1:
-                self.result = 0
+                self.result = MCTSNode.DRAW
             elif all_children_resolved:
                 self.result = best_child_result
 
