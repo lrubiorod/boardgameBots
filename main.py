@@ -60,7 +60,7 @@ def get_player_move(game):
             user_input = input(f'Move Player {game.get_current_player()}: ')
             move = game.process_user_input(user_input)
 
-            if move and move in game.get_available_moves():
+            if move in game.get_available_moves():
                 return move
             else:
                 print("Invalid movement. Try again!")

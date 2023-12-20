@@ -17,6 +17,13 @@ class TicTacToe(Game):
     def get_winner(self):
         return self.winner
 
+    def process_user_input(self, user_input):
+
+        if not user_input.isdigit() and len(user_input) != 1:
+            raise ValueError("Coordinates should be numbers")
+
+        return int(user_input) - 1
+
     def copy(self):
         new_game = TicTacToe()
         new_game.board = self.board[:]
@@ -41,6 +48,8 @@ class TicTacToe(Game):
 
             self.current_player = self.next_player()
             return True
+
+        print(f"Available moves are: {self.get_available_moves()}")
         return False
 
     def undo_move(self):

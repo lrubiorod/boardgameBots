@@ -17,6 +17,13 @@ class ConnectFour(Game):
     def get_winner(self):
         return self.winner
 
+    def process_user_input(self, user_input):
+
+        if not user_input.isdigit() and len(user_input) != 1:
+            raise ValueError("Coordinates should be numbers")
+
+        return int(user_input)
+
     def copy(self):
         new_game = ConnectFour()
         new_game.board = [row[:] for row in self.board]
