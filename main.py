@@ -2,7 +2,8 @@ import time
 
 from games.tictactoe import TicTacToe
 from games.connect4 import ConnectFour
-from games.easy_boop import Boop
+from games.boop import Boop
+from games.easy_boop import EasyBoop
 from strategies.minimax import MinimaxPlayer
 from strategies.alphabeta import AlphaBetaPlayer
 from strategies.mcts import MCTSPlayer
@@ -64,6 +65,7 @@ def get_player_move(game):
                 return move
             else:
                 print("Invalid movement. Try again!")
+                print(f"Available movements: {game.get_available_moves()}")
         except ValueError as e:
             print(e)
 
@@ -71,12 +73,15 @@ def get_player_move(game):
 def choose_game():
     while True:
         try:
-            choice = int(input("Which game would you like to play?\n 1: TicTacToe\n 2: Connect4\n 3: Boop\n"))
+            choice = int(input("Which game would you like to play?\n 1: TicTacToe\n 2: Connect4\n"
+                               " 3: EasyBoop\n 4: Boop\n"))
             if choice == 1:
                 return TicTacToe()
             elif choice == 2:
                 return ConnectFour()
             elif choice == 3:
+                return EasyBoop()
+            elif choice == 4:
                 return Boop()
             else:
                 print("Invalid choice. Please try again.")

@@ -1,7 +1,7 @@
 from game import Game
 
 
-class Boop(Game):
+class EasyBoop(Game):
     def __init__(self):
         self.board = [[' ' for _ in range(6)] for _ in range(6)]
         self.current_player = 1
@@ -10,7 +10,7 @@ class Boop(Game):
         self.pieces_count = {'a': 0, 'b': 0}
 
     def game_name(self):
-        return "Boop"
+        return "EasyBoop"
 
     def get_current_player(self):
         return self.current_player
@@ -19,7 +19,7 @@ class Boop(Game):
         return self.winner
 
     def copy(self):
-        new_game = Boop()
+        new_game = EasyBoop()
         new_game.board = [row[:] for row in self.board]
         new_game.current_player = self.current_player
         new_game.winner = self.winner
