@@ -2,7 +2,7 @@ import time
 
 from games.tictactoe import TicTacToe
 from games.connect4 import ConnectFour
-from games.boop import Boop
+from games.easy_boop import Boop
 from strategies.minimax import MinimaxPlayer
 from strategies.alphabeta import AlphaBetaPlayer
 from strategies.mcts import MCTSPlayer
@@ -26,7 +26,8 @@ def main():
             end_time = time.time()
             duration = end_time - start_time
 
-            game.make_move(move)
+            if not game.make_move(move):
+                print("Invalid movement. Try again!")
         else:
             start_time = time.time()
             move, n = player.choose_move(game)
@@ -56,29 +57,15 @@ def main():
 def get_player_move(game):
     while True:
         try:
-            move = None
             user_input = input(f'Move Player {game.get_current_player()}: ')
-            if game.game_name() == "Boop":
-                if len(user_input) == 2 and user_input.isdigit():
-                    row = int(user_input[0])
-                    col = int(user_input[1])
+            move = game.process_user_input(user_input)
 
-                    # Check if the indices are within the range of the board
-                    if 0 <= row < 6 and 0 <= col < 6:
-                        move = (row, col)
-                        # Here you can call game.make_move(move) or perform other checks
-                    else:
-                        print("Move out of range. Please try again.")
-                else:
-                    print("Invalid input. Please enter two digits.")
-            else:
-                move = int(user_input)
-
-            if move in game.get_available_moves():
+            if move and move in game.get_available_moves():
                 return move
-            print("Invalid movement. Try again!")
-        except ValueError:
-            print("Write a valid number please!")
+            else:
+                print("Invalid movement. Try again!")
+        except ValueError as e:
+            print(e)
 
 
 def choose_game():

@@ -41,3 +41,7 @@ class Game(ABC):
     @abstractmethod
     def game_name(self):
         pass
+
+    @abstractmethod
+    def process_user_input(self, user_input):
+        pass
