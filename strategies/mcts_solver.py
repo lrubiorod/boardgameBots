@@ -97,6 +97,10 @@ class MCTSSolverPlayer(BotPlayer):
     def choose_move(self, game):
         root = MCTSNode(game.copy(), parent=None, move=None)
 
+        # Handle case only 1 option
+        if len(root.untried_moves) == 1:
+            return root.untried_moves[0], 1
+
         start_time = time.time()
         while time.time() - start_time < self.time_limit:
             if root.result is not None:
