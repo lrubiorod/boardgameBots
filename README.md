@@ -39,7 +39,8 @@ Follow the on-screen instructions to play the game.
 - [**TicTacToe**](https://boardgamegeek.com/boardgame/11901/tic-tac-toe): The classic 3x3 grid game.
 - [**Connect4**](https://boardgamegeek.com/boardgame/2719/connect-four): The popular 4-in-a-row game. 
 - [**Boop.**](https://boardgamegeek.com/boardgame/355433/boop): A deceptively cute, deceivingly challenging abstract 
-strategy game for two players. 
+strategy game for two players.
+- [**EasyBoop.**](https://boardgamegeek.com/boardgame/355433/boop): A simplified version of Boop, designed for quicker and more straightforward gameplay.
 
 ## AI Strategies
 
