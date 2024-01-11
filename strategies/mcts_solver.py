@@ -90,23 +90,25 @@ class MCTSSolverPlayer(BotPlayer):
     def __init__(self, time_limit=5, player=2):
         self.time_limit = time_limit
         self.player = player
+        self.root = None
 
     def algorithm_name(self):
         return "MCTS-Solver"
 
     def choose_move(self, game):
-        root = MCTSNode(game.copy(), parent=None, move=None)
+        if self.root is None:
+            self.root = MCTSNode(game.copy(), parent=None, move=None)
 
         # Handle case only 1 option
-        if len(root.untried_moves) == 1:
-            return root.untried_moves[0], 1
+        if len(self.root.untried_moves) == 1:
+            return self.root.untried_moves[0], 1
 
         start_time = time.time()
         while time.time() - start_time < self.time_limit:
-            if root.result is not None:
+            if self.root.result is not None:
                 break
 
-            node = root
+            node = self.root
             temp_game = game.copy()
 
             # Selection
@@ -135,10 +137,20 @@ class MCTSSolverPlayer(BotPlayer):
 
                 node = node.parent
 
-        # print_debug(root)
+        # print_debug(self.root)
 
-        best_move = root.best_child(c_param=0).move
-        return best_move, root.visits
+        best_move = self.root.best_child(c_param=0).move
+        return best_move, self.root.visits
+
+    def update(self, move):
+        if self.root:
+            for child in self.root.children:
+                if child.move == move:
+                    self.root = child
+                    self.root.parent = None
+                    return
+
+        self.root = None
 
 
 def print_debug(node):

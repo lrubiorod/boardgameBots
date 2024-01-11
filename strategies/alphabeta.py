@@ -56,3 +56,7 @@ class AlphaBetaPlayer(BotPlayer):
                 if beta <= alpha:
                     break
             return min_eval, n_calls
+
+    def update(self, _move):
+        return
+

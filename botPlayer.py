@@ -9,3 +9,6 @@ class BotPlayer(ABC):
     @abstractmethod
     def algorithm_name(self):
         pass
+
+    def update(self, move):
+        pass

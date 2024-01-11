@@ -66,3 +66,6 @@ class MinimaxPlayer(BotPlayer):
                     best_score = score
                     min_moves = n_moves
             return best_score, acc_score, min_moves, n_calls
+
+    def update(self, _move):
+        return

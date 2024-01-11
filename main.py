@@ -27,7 +27,11 @@ def main():
             end_time = time.time()
             duration = end_time - start_time
 
-            if not game.make_move(move):
+            valid_human_move = game.make_move(move)
+
+            if valid_human_move:
+                update_players(players, move)
+            else:
                 print("Invalid movement. Try again!")
         else:
             start_time = time.time()
@@ -38,6 +42,7 @@ def main():
             print(f'Move Player {turn} ({player.algorithm_name()}): {move}')
             print(f'{player.algorithm_name()} strategy used {n} iterations and took {duration:.6f} seconds')
             game.make_move(move)
+            update_players(players, move)
 
         player_duration[turn - 1] += duration
 
@@ -53,6 +58,12 @@ def main():
                 print(f'Player {i +1} time: {duration:.6f}')
 
             break
+
+
+def update_players(players, move):
+    for player in players:
+        if player != "human":
+            player.update(move)
 
 
 def get_player_move(game):

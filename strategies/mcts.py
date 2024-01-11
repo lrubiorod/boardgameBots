@@ -36,20 +36,22 @@ class MCTSPlayer(BotPlayer):
     def __init__(self, time_limit=5, player=2):
         self.time_limit = time_limit
         self.player = player
+        self.root = None
 
     def algorithm_name(self):
         return "MCTS"
 
     def choose_move(self, game):
-        root = MCTSNode(game.copy(), parent=None, move=None)
+        if self.root is None:
+            self.root = MCTSNode(game.copy(), parent=None, move=None)
 
         # Handle case only 1 option
-        if len(root.untried_moves) == 1:
-            return root.untried_moves[0], 1
+        if len(self.root.untried_moves) == 1:
+            return self.root.untried_moves[0], 1
 
         start_time = time.time()
         while time.time() - start_time < self.time_limit:
-            node = root
+            node = self.root
             temp_game = game.copy()
             first_expansion = True
 
@@ -66,7 +68,7 @@ class MCTSPlayer(BotPlayer):
 
                 # Handle case win with 1 movement
                 if first_expansion and (temp_game.evaluate_game_state(self.player) == 1):
-                    return move, root.visits
+                    return move, self.root.visits
 
                 node = node.add_child(move, temp_game)
 
@@ -80,9 +82,22 @@ class MCTSPlayer(BotPlayer):
                 node.wins += temp_game.evaluate_game_state(self.player)
                 node = node.parent
 
-        for child in root.children:
-            win_visit_ratio = child.wins / child.visits if child.visits > 0 else 0
-            print(f"Move: {child.move}, Win/Visit Ratio: {win_visit_ratio:0.4f}, Visits: {child.visits}, ")
+        # print_debug(self.root)
 
-        best_move = root.best_child(c_param=0).move
-        return best_move, root.visits
+        best_move = self.root.best_child(c_param=0).move
+        return best_move, self.root.visits
+
+    def update(self, move):
+        for child in self.root.children:
+            if child.move == move:
+                self.root = child
+                self.root.parent = None
+                return
+
+        self.root = None
+
+
+def print_debug(node):
+    for child in node.children:
+        win_visit_ratio = child.wins / child.visits if child.visits > 0 else 0
+        print(f"Move: {child.move}, Win/Visit Ratio: {win_visit_ratio:0.4f}, Visits: {child.visits}, ")
