@@ -403,24 +403,14 @@ class Boop(Game):
         return available_moves
 
     def get_available_spaces(self):
-        central_area = {(2, 2), (2, 3), (3, 2), (3, 3)}
-        intermediate_area = {(row, col) for row in range(1, 5) for col in range(1, 5)} - central_area
-
-        def classify_move(row, col):
-            if (row, col) in central_area:
-                return 'central'
-            elif (row, col) in intermediate_area:
-                return 'intermediate'
-            else:
-                return 'outer'
-
-        available_moves = [(row, col) for row in range(6) for col in range(6) if self.board[row][col] == ' ']
-        moves_classified = {'central': [], 'intermediate': [], 'outer': []}
-
-        for move in available_moves:
-            moves_classified[classify_move(*move)].append(move)
-
-        return moves_classified['central'] + moves_classified['intermediate'] + moves_classified['outer']
+        """
+        Retrieves a list of available spaces on the board.
+        It iterates through the 6x6 board grid, checking for empty spaces.
+        An empty space is indicated by ' ' (a space character) in the board array.
+        The function returns a list of tuples, where each tuple represents the coordinates
+        (row, col) of an available space.
+        """
+        return [(row, col) for row in range(6) for col in range(6) if self.board[row][col] == ' ']
 
     def is_game_over(self):
         return self.winner is not None
