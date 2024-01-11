@@ -119,12 +119,7 @@ class Boop(Game):
             size = 'small' if mov_type == Boop.MOVE_S else 'big'
             self.make_normal_move(row, col, size)
         else:
-            if mov_type == Boop.CHANGE_1:
-                row, col = positions[0]
-                self.upgrade_one_cat(row, col)
-            else:
-                for (row, col) in positions:
-                    self.upgrade_one_cat(row, col)
+            self.make_change_cats_move(move)
 
         if not self.is_game_over():
             next_state = self.next_states[0]
@@ -134,6 +129,16 @@ class Boop(Game):
                 self.current_player = 2
 
         return True
+
+    def make_change_cats_move(self, move):
+        mov_type, positions = move
+
+        if mov_type == Boop.CHANGE_1:
+            row, col = positions[0]
+            self.upgrade_one_cat(row, col)
+        else:
+            for (row, col) in positions:
+                self.upgrade_one_cat(row, col)
 
     def upgrade_one_cat(self, row, col):
         letter = self.board[row][col]
@@ -201,7 +206,13 @@ class Boop(Game):
                     elif change[0] == 'CHANGE_3_A':
                         for three_pos in change[1]:
                             t.append((Boop.CHANGE_3, three_pos))
-                self.next_states.append((Boop.CHANGE_CATS_A, t))
+
+                # In case of only one change movement, it makes automatically
+                if len(t) == 1:
+                    change_move = t[0]
+                    self.make_change_cats_move(change_move)
+                else:
+                    self.next_states.append((Boop.CHANGE_CATS_A, t))
 
             if possible_changes_b:
                 t = []
@@ -213,7 +224,13 @@ class Boop(Game):
                     elif change[0] == 'CHANGE_3_B':
                         for three_pos in change[1]:
                             t.append((Boop.CHANGE_3, three_pos))
-                self.next_states.append((Boop.CHANGE_CATS_B, t))
+
+                # In case of only one change movement, it makes automatically
+                if len(t) == 1:
+                    change_move = t[0]
+                    self.make_change_cats_move(change_move)
+                else:
+                    self.next_states.append((Boop.CHANGE_CATS_B, t))
 
             next_turn = Boop.PUT_CAT_A if self.current_player == 2 else Boop.PUT_CAT_B
             self.next_states.append((next_turn, []))
