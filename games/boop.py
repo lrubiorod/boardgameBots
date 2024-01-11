@@ -380,24 +380,36 @@ class Boop(Game):
         return 'NONE', []  # No three-in-line found
 
     def get_available_moves(self):
+        """
+        Determines the available moves for the current state of the game.
+        If it's a turn to put a cat on the board (either small or big),
+        it iterates through available spaces to add possible moves.
+        If it's a turn to change cats, it returns the moves available in the current state.
+        """
+        # If no next states, return an empty list
         if not self.next_states:
             return []
-        
+
         state = self.next_states[0]
         available_moves = []
-        if state[0] == Boop.PUT_CAT_A:
+        # Check if it's a player's turn to put a cat
+        if state[0] in [Boop.PUT_CAT_A, Boop.PUT_CAT_B]:
+
+            player_number = 1 if state[0] == Boop.PUT_CAT_A else 2
+            small_pieces_count = self.small_pieces_player[player_number]
+            small_pieces_in_board = self.played_pieces_count['a' if player_number == 1 else 'b']
+            big_pieces_count = self.big_pieces_player[player_number]
+            big_pieces_in_board = self.played_pieces_count['A' if player_number == 1 else 'B']
+
             for space in self.get_available_spaces():
-                if self.small_pieces_player[1] - self.played_pieces_count['a'] > 0:
+                # Check if small pieces are available and append move
+                if small_pieces_count - small_pieces_in_board > 0:
                     available_moves.append((Boop.MOVE_S, [space]))
-                if self.big_pieces_player[1] - self.played_pieces_count['A'] > 0:
-                    available_moves.append((Boop.MOVE_B, [space]))
-        elif state[0] == Boop.PUT_CAT_B:
-            for space in self.get_available_spaces():
-                if self.small_pieces_player[2] - self.played_pieces_count['b'] > 0:
-                    available_moves.append((Boop.MOVE_S, [space]))
-                if self.big_pieces_player[2] - self.played_pieces_count['B'] > 0:
+                # Check if big pieces are available and append move
+                if big_pieces_count - big_pieces_in_board > 0:
                     available_moves.append((Boop.MOVE_B, [space]))
         else:
+            # If it's not a turn to put a cat, use the moves from the current state
             available_moves = state[1]
 
         return available_moves
