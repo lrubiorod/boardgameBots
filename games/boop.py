@@ -341,39 +341,38 @@ class Boop(Game):
         return 'NONE', []  # No three-in-line found
 
     def has_three_in_line(self, start_row, start_col, delta_row, delta_col, letter, max_count):
-        """Checks a line for a three-in-line condition."""
+        """Checks a line for a three-in-line condition. Evaluates both small and big cats.
+        If three big cats are in line, it's a win. If three cats in line but not all are big,
+        it marks a possible change from small to big cats."""
         count = 0
         big_count = 0
         three_pos = []
         possible_changes = []
 
-        for i in range(max_count + 2):
-            row, col = start_row + i * delta_row, start_col + i * delta_col
-            if not (0 <= row < 6 and 0 <= col < 6):
-                three_pos = []  # Start a new sequence
-                count = big_count = 0  # Reset the counters
-                continue
+        row, col = start_row, start_col
+        for _ in range(max_count + 2):
+            if 0 <= row < 6 and 0 <= col < 6:
+                this_letter = self.board[row][col]
+                if this_letter.lower() == letter.lower():
+                    three_pos.append((row, col))
+                    count += 1
+                    if this_letter.isupper():
+                        big_count += 1
 
-            this_letter = self.board[row][col]
-            if this_letter.lower() == letter.lower():
-                three_pos.append((row, col))
-                count += 1
-                if this_letter.isupper():
-                    big_count += 1
+                    if count == max_count:
+                        if big_count == max_count:
+                            return f'WIN_{letter.upper()}', three_pos  # Win condition with all big cats
+                        possible_changes.append(three_pos.copy())  # Potential change with small cats
+                        r, c = three_pos.pop(0)
+                        if self.board[r][c] == letter.upper():
+                            big_count -= 1
+                        count -= 1
+                else:
+                    three_pos = []  # Reset if sequence is broken
+                    count = big_count = 0
 
-                if count == max_count:
-                    if big_count == max_count:
-                        return f'WIN_{letter.upper()}', three_pos  # All three are big, it's a win
-
-                    possible_changes.append(three_pos.copy())  # Possible change of small cats to big ones
-                    r, c = three_pos.pop(0)  # Remove first position
-                    if self.board[r][c] == letter.upper():
-                        big_count -= 1
-                    count -= 1
-
-            else:
-                three_pos = []  # Start a new sequence
-                count = big_count = 0  # Reset the counters
+            row += delta_row
+            col += delta_col
 
         if possible_changes:
             return f'CHANGE_3_{letter.upper()}', possible_changes
