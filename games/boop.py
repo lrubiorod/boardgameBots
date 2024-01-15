@@ -1,5 +1,7 @@
-from game import Game
 import copy
+
+from game import Game
+from games.games_utils import adjust_start_position
 
 
 class Boop(Game):
@@ -298,47 +300,40 @@ class Boop(Game):
             self.next_states = previous_state.next_states
 
     def check_three(self, last_move):
-        """Checks if the last move leads to a win."""
+        """
+        Checks if the last move leads to a win, a change, or neither.
+        Evaluates lines (rows, columns, diagonals) from the last move for three consecutive cats.
+
+        Returns:
+            A tuple indicating either a win, a change of three small cats to big cats, or none.
+            For wins and changes, it also returns the positions of the cats involved.
+        """
         row, col = last_move
         max_count = 3
         letter = self.board[row][col]
 
         possible_changes = []
 
-        # Append Row results
-        row_result = self.has_three_in_line(row, max(col - (max_count - 1), 0), 0, 1, letter, max_count)
-        if row_result[0] == f'WIN_{letter.upper()}':
-            return row_result
-        elif row_result[0] == f'CHANGE_3_{letter.upper()}':
-            for v in row_result[1]:
-                possible_changes.append(v)
+        # Check all directions from the last move: rows, columns, diagonals
+        directions = [
+            (0, 1),  # Row
+            (1, 0),  # Column
+            (1, 1),  # Diagonal down-right
+            (1, -1)  # Diagonal down-left
+        ]
 
-        # Append Col results
-        col_result = self.has_three_in_line(max(row - (max_count - 1), 0), col, 1, 0, letter, max_count)
-        if col_result[0] == f'WIN_{letter.upper()}':
-            return col_result
-        elif col_result[0] == f'CHANGE_3_{letter.upper()}':
-            for v in col_result[1]:
-                possible_changes.append(v)
+        for dr, dc in directions:
+            start_row, start_col = adjust_start_position(row, col, dr, dc, max_count)
+            result = self.has_three_in_line(start_row, start_col, dr, dc, letter, max_count)
 
-        for dr, dc in [(1, 1), (1, -1)]:
-            start_row = row
-            start_col = col
-            for _ in range(max_count - 1):
-                if 0 <= start_row - dr < 6 and 0 <= start_col - dc < 6:
-                    start_row -= dr
-                    start_col -= dc
-            # Append diagonal results
-            d_result = self.has_three_in_line(start_row, start_col, dr, dc, letter, max_count)
-            if d_result[0] == f'WIN_{letter.upper()}':
-                return d_result
-            elif d_result[0] == f'CHANGE_3_{letter.upper()}':
-                for v in d_result[1]:
-                    possible_changes.append(v)
+            if result[0] == f'WIN_{letter.upper()}':
+                return result
+            elif result[0] == f'CHANGE_3_{letter.upper()}':
+                possible_changes.extend(result[1])
 
         if possible_changes:
             return f'CHANGE_3_{letter.upper()}', possible_changes
-        return 'NONE', []  # No three-in-line found
+        return 'NONE', []
 
     def has_three_in_line(self, start_row, start_col, delta_row, delta_col, letter, max_count):
         """Checks a line for a three-in-line condition. Evaluates both small and big cats.
