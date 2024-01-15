@@ -169,7 +169,7 @@ class Boop(Game):
         possible_changes_b = []
         winner_a = False
         winner_b = False
-        result = self.check_number_pieces(row, col)
+        result = self.check_number_pieces(current_player_letter)
         if result == 'WIN_A':
             winner_a = True
         elif result == 'WIN_B':
@@ -239,14 +239,27 @@ class Boop(Game):
 
         return
 
-    def check_number_pieces(self, row, col):
-        letter = self.board[row][col]
+    def check_number_pieces(self, letter):
+        """
+        Checks the number of pieces for a specific player on the board to determine game status.
+        It determines if a player has won, if a change of pieces (small to big) is needed, or if there is no special action required.
 
+        Parameters:
+            letter (str): The letter representing the player (either upper or lower case).
+
+        Returns:
+            str: A string indicating the game status: 'WIN', 'CHANGE_1', or 'NOTHING'.
+        """
+
+        # If a player has placed all big pieces on the board, it's a win
         if letter.isupper() and (self.played_pieces_count[letter] == 8):
             return f'WIN_{letter.upper()}'
-        elif self.played_pieces_count[letter.upper()] + self.played_pieces_count[letter.lower()] == 8:
 
+        # If the combined count of small and big pieces reaches 8, it's time to change small to big pieces
+        elif self.played_pieces_count[letter.upper()] + self.played_pieces_count[letter.lower()] == 8:
             return f'CHANGE_1_{letter.upper()}'
+
+        # Otherwise, there's no special condition to address
         else:
             return 'NOTHING'
 
