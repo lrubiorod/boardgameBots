@@ -251,39 +251,72 @@ class Boop(Game):
             return 'NOTHING'
 
     def shift_adjacent_pieces(self, row, col):
+        """
+        Shifts adjacent pieces around a given position on the board.
+        Only shifts a piece if it's smaller or equal than the played piece.
+
+        Parameters:
+            row (int): The row of the played piece.
+            col (int): The column of the played piece.
+
+        Returns:
+            list: A list of new positions where adjacent pieces were moved.
+        """
 
         def is_bigger_piece(first, second):
-            if first.isupper():
-                return True
-            elif second.isupper():
-                return False
-            else:
-                return True
+            """
+            Determines if the first piece is bigger or equal than the second.
+            A piece is considered bigger if it's uppercase.
+            """
+            return first.isupper() or not second.isupper()
 
         played_letter = self.board[row][col]
-        shifted_pieces = []
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
-        for dr, dc in directions:
-            adj_row, adj_col = row + dr, col + dc
-            if (0 <= adj_row < 6 and 0 <= adj_col < 6 and self.board[adj_row][adj_col] != ' '
-                    and is_bigger_piece(played_letter, self.board[adj_row][adj_col])):
-                new_position = self.shift_piece(adj_row, adj_col, dr, dc)
-                if new_position:
-                    shifted_pieces.append(new_position)
-        return shifted_pieces
+
+        # Shift each adjacent piece if it's smaller than the played piece
+        shifted_pieces = [self.shift_piece(row + dr, col + dc, dr, dc)
+                          for dr, dc in directions
+                          if 0 <= row + dr < 6 and 0 <= col + dc < 6
+                          and self.board[row + dr][col + dc] != ' '
+                          and is_bigger_piece(played_letter, self.board[row + dr][col + dc])]
+
+        # Filter out None values (cases where no shift occurred)
+        return [pos for pos in shifted_pieces if pos]
 
     def shift_piece(self, row, col, dr, dc):
+        """
+        Shifts a piece on the board based on the given direction.
+        If the target position is off the board, the piece is removed.
+        If the target position is empty, the piece is moved to that position.
+
+        Parameters:
+            row (int): The row of the piece to be moved.
+            col (int): The column of the piece to be moved.
+            dr (int): The row direction of the movement.
+            dc (int): The column direction of the movement.
+
+        Returns:
+            list or None: The new position [target_row, target_col] if the piece is moved,
+                          or None if the piece is removed or no movement is made.
+        """
+        # Calculate the target position
         target_row, target_col = row + dr, col + dc
+
+        # Case when the target position is off the board
         if not (0 <= target_row < 6 and 0 <= target_col < 6):
             fallen_piece = self.board[row][col]
             self.board[row][col] = ' '
             if fallen_piece in self.played_pieces_count:
                 self.played_pieces_count[fallen_piece] -= 1
+            return None
+
+        # Case when the target position is empty on the board
         elif self.board[target_row][target_col] == ' ':
             self.board[target_row][target_col] = self.board[row][col]
             self.board[row][col] = ' '
             return [target_row, target_col]
 
+        # No movement is made
         return None
 
     def undo_move(self):
