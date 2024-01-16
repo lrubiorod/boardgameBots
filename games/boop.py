@@ -13,8 +13,7 @@ class Boop(Game):
     # BOOP MOVEMENTS
     MOVE_S = "Move Small"
     MOVE_B = "Move Big"
-    CHANGE_1 = "Change 1 cat"
-    CHANGE_3 = "Change 3 cats"
+    CHANGE = "Change cats"
 
     # HOW TO USE
     HOW_TO_USE = ("Commands should be:\n"
@@ -63,10 +62,10 @@ class Boop(Game):
         elif action == "mb" and len(coordinates) == 2:
             return Boop.MOVE_B, [(int(coordinates[0]), int(coordinates[1]))]
         elif action == "c1" and len(coordinates) == 2:
-            return Boop.CHANGE_1, [(int(coordinates[0]), int(coordinates[1]))]
+            return Boop.CHANGE, [(int(coordinates[0]), int(coordinates[1]))]
         elif action == "c3" and len(coordinates) == 6:
             pos_list = [(int(coordinates[i]), int(coordinates[i + 1])) for i in range(0, len(coordinates), 2)]
-            return Boop.CHANGE_3, pos_list
+            return Boop.CHANGE, pos_list
         else:
             raise ValueError(f"Invalid format. {Boop.HOW_TO_USE}")
 
@@ -121,7 +120,7 @@ class Boop(Game):
             size = 'small' if mov_type == Boop.MOVE_S else 'big'
             self.make_normal_move(row, col, size)
         else:
-            self.make_change_cats_move(move)
+            self.make_change_cats_move(positions)
 
         if not self.is_game_over():
             next_state = self.next_states[0]
@@ -132,27 +131,42 @@ class Boop(Game):
 
         return True
 
-    def make_change_cats_move(self, move):
-        mov_type, positions = move
+    def make_change_cats_move(self, positions):
+        """
+        Executes the move to change cats on the board. This can be either changing one cat or multiple cats.
+        Instead of receiving a move type, it directly receives the positions of the cats to be upgraded.
 
-        if mov_type == Boop.CHANGE_1:
-            row, col = positions[0]
-            self.upgrade_one_cat(row, col)
-        else:
-            for (row, col) in positions:
-                self.upgrade_one_cat(row, col)
+        Parameters:
+            positions (list of tuples): A list of tuples where each tuple represents the row and column of a
+            cat to be upgraded.
+        """
+
+        # Process each position to upgrade the cat
+        for position in positions:
+            self.upgrade_one_cat(*position)  # Unpack the tuple directly into row and col
 
     def upgrade_one_cat(self, row, col):
+        """
+        Upgrades a single cat from small to big, adjusting the counts of small and big pieces accordingly.
+
+        Parameters:
+            row (int): The row of the cat to upgrade.
+            col (int): The column of the cat to upgrade.
+        """
         letter = self.board[row][col]
         self.played_pieces_count[letter] -= 1
 
+        # Remove the small cat from the board
         self.board[row][col] = ' '
-        if letter == 'a':
-            self.small_pieces_player[1] -= 1
-            self.big_pieces_player[1] += 1
-        elif letter == 'b':
-            self.small_pieces_player[2] -= 1
-            self.big_pieces_player[2] += 1
+
+        # Determine the player number based on the letter
+        player_number = 1 if letter.lower() == 'a' else 2
+
+        # Update the counts of small and big pieces for the respective player
+        # Only if the piece is a small piece (lowercase letter)
+        if letter.islower():
+            self.small_pieces_player[player_number] -= 1
+            self.big_pieces_player[player_number] += 1
 
     def make_normal_move(self, row, col, size):
         """
@@ -235,23 +249,31 @@ class Boop(Game):
     def prepare_next_state_changes(self, changes, letter):
         """
         Prepares the next state changes based on the current game status.
+        It handles both single and multiple cat change scenarios.
 
         Parameters:
             changes (list): List of changes to process.
             letter (str): Letter representing the player ('A' or 'B').
         """
         t = []
+        # Separate processing for single and multiple cat changes
         for change in changes:
-            if change[0] == f'CHANGE_1_{letter}':
+            change_type, change_positions = change
+            if change_type == f'CHANGE_1_{letter}':
+                # For single cat changes, find all positions of the specified letter and prepare change moves
                 change1_pos = self.find_letter_positions(letter)
-                t.extend([(Boop.CHANGE_1, [pos]) for pos in change1_pos])
-            elif change[0] == f'CHANGE_3_{letter}':
-                t.extend([(Boop.CHANGE_3, three_pos) for three_pos in change[1]])
+                t.extend([(Boop.CHANGE, [pos]) for pos in change1_pos])
+            elif change_type == f'CHANGE_3_{letter}':
+                # For multiple cat changes, prepare change moves directly from the positions
+                t.extend([(Boop.CHANGE, three_pos) for three_pos in change_positions])
 
+        # If there's only one change move, execute it directly
         if len(t) == 1:
-            self.make_change_cats_move(t[0])
+            self.make_change_cats_move(t[0][1])
+        # If there are multiple change moves, add them to the next states
         elif len(t) > 1:
-            self.next_states.append((Boop.CHANGE_CATS_A if letter == 'A' else Boop.CHANGE_CATS_B, t))
+            next_state = Boop.CHANGE_CATS_A if letter == 'A' else Boop.CHANGE_CATS_B
+            self.next_states.append((next_state, t))
 
     def update_next_states(self):
         """
