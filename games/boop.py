@@ -104,30 +104,42 @@ class Boop(Game):
         return positions
 
     def make_move(self, move):
+        """
+        Executes a given move in the game. This can be either placing a cat on the board or changing cats.
+
+        Parameters:
+            move (tuple): Contains the type of move and the positions associated with the move.
+
+        Returns:
+            bool: True if the move is successfully executed, False otherwise.
+        """
+
+        # Check if the move is valid
         available_moves = self.get_available_moves()
         if move not in available_moves:
             print(f'Move: {move} not in available moves: {available_moves}')
             return False
 
+        # Save the current state for potential undo functionality
         self.previous_state = self.copy()
 
+        # Extract move type and positions
         mov_type, positions = move
-        state = self.next_states.pop(0)
+        current_state = self.next_states.pop(0)
 
-        # Normal movement, putting a cat
-        if state[0] == Boop.PUT_CAT_A or state[0] == Boop.PUT_CAT_B:
+        # Check if it's a normal move (placing a cat) or a change move
+        if current_state[0] in [Boop.PUT_CAT_A, Boop.PUT_CAT_B]:
+            # Execute a normal move
             row, col = positions[0]
             size = 'small' if mov_type == Boop.MOVE_S else 'big'
             self.make_normal_move(row, col, size)
         else:
+            # Execute a change cats move
             self.make_change_cats_move(positions)
 
+        # Update the current player if the game is not over
         if not self.is_game_over():
-            next_state = self.next_states[0]
-            if next_state[0] == Boop.PUT_CAT_A or next_state[0] == Boop.CHANGE_CATS_A:
-                self.current_player = 1
-            else:
-                self.current_player = 2
+            self.current_player = 1 if self.next_states[0][0] in [Boop.PUT_CAT_A, Boop.CHANGE_CATS_A] else 2
 
         return True
 
