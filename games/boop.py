@@ -34,6 +34,7 @@ class Boop(Game):
         self.big_pieces_player = {1: 0, 2: 0}
         self.played_pieces_count = {'A': 0, 'B': 0, 'a': 0, 'b': 0}
         self.next_states = [create_action_dict(1, Boop.PLACE_CAT, [])]
+        self.track_previous_state = True
 
     def game_name(self):
         """
@@ -88,16 +89,21 @@ class Boop(Game):
         else:
             raise ValueError(f"Invalid format. {Boop.HOW_TO_USE}")
 
-    def copy(self):
+    def copy(self, track_previous_state=True):
         new_game = Boop()
         new_game.board = [row[:] for row in self.board]
         new_game.current_player = self.current_player
         new_game.winner = self.winner
-        new_game.previous_state = self.previous_state.copy() if self.previous_state else None
         new_game.small_pieces_player = self.small_pieces_player.copy()
         new_game.big_pieces_player = self.big_pieces_player.copy()
         new_game.played_pieces_count = self.played_pieces_count.copy()
         new_game.next_states = copy.deepcopy(self.next_states)  # Deep copy
+
+        new_game.track_previous_state = track_previous_state
+        if track_previous_state and self.previous_state:
+            new_game.previous_state = self.previous_state.copy()
+        else:
+            new_game.previous_state = None
 
         return new_game
 
@@ -140,7 +146,8 @@ class Boop(Game):
             return False
 
         # Save the current state for potential undo functionality
-        self.previous_state = self.copy()
+        if self.track_previous_state:
+            self.previous_state = self.copy()
 
         # Extract move type and positions
         mov_type, positions = move

@@ -27,7 +27,7 @@ class Game(ABC):
         pass
 
     @abstractmethod
-    def copy(self):
+    def copy(self, track_previous_state):
         pass
 
     @abstractmethod

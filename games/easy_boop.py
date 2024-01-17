@@ -18,7 +18,7 @@ class EasyBoop(Game):
     def get_winner(self):
         return self.winner
 
-    def copy(self):
+    def copy(self, track_previous_state=True):
         new_game = EasyBoop()
         new_game.board = [row[:] for row in self.board]
         new_game.current_player = self.current_player

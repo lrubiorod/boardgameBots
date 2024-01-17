@@ -24,7 +24,7 @@ class ConnectFour(Game):
 
         return int(user_input)
 
-    def copy(self):
+    def copy(self, track_previous_state=True):
         new_game = ConnectFour()
         new_game.board = [row[:] for row in self.board]
         new_game.current_player = self.current_player

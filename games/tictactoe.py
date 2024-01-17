@@ -24,7 +24,7 @@ class TicTacToe(Game):
 
         return int(user_input) - 1
 
-    def copy(self):
+    def copy(self, track_previous_state=True):
         new_game = TicTacToe()
         new_game.board = self.board[:]
         new_game.current_player = self.current_player

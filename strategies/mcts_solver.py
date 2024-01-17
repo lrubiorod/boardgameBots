@@ -97,7 +97,7 @@ class MCTSSolverPlayer(BotPlayer):
 
     def choose_move(self, game):
         if self.root is None:
-            self.root = MCTSNode(game.copy(), parent=None, move=None)
+            self.root = MCTSNode(game.copy(track_previous_state=False), parent=None, move=None)
 
         # Handle case only 1 option
         if len(self.root.untried_moves) == 1:
@@ -109,7 +109,7 @@ class MCTSSolverPlayer(BotPlayer):
                 break
 
             node = self.root
-            temp_game = game.copy()
+            temp_game = game.copy(track_previous_state=False)
 
             # Selection
             while node.is_fully_expanded() and not temp_game.is_game_over():
