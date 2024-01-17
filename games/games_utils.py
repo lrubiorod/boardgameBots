@@ -20,3 +20,25 @@ def adjust_start_position(row, col, delta_row, delta_col, max_count):
             start_row -= delta_row
             start_col -= delta_col
     return start_row, start_col
+
+
+def create_action_dict(player, action_type, options):
+    """
+    Creates a dictionary representing a pending action in the game, particularly useful for actions
+    that involve multiple choices, like changing cats. This structure enhances clarity and
+    flexibility in handling game decisions.
+
+    Parameters:
+        player (int): The player number who is responsible for the action.
+        action_type (str): The type of action, e.g., 'Change Cats', 'Place Cat'.
+        options (list of lists of tuples): Options available for the action, each option being
+                                           a list of positions (tuples) on the board.
+
+    Returns:
+        dict: A dictionary representing the pending action with its available options.
+    """
+    return {
+        "player": player,
+        "type": action_type,
+        "options": options,
+    }

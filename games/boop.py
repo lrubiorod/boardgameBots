@@ -1,19 +1,18 @@
 import copy
 
 from game import Game
-from games.games_utils import adjust_start_position
+from games.games_utils import adjust_start_position, create_action_dict
 
 
 class Boop(Game):
-    PUT_CAT_A = 'Turn A'
-    PUT_CAT_B = 'Turn B'
-    CHANGE_CATS_A = 'Change Cats A'
-    CHANGE_CATS_B = 'Change Cats B'
+    # BOOP TURN TYPE
+    PLACE_CAT = 'Place Cat'
+    CHANGE_CATS = 'Change Cats'
 
     # BOOP MOVEMENTS
     MOVE_S = "Move Small"
     MOVE_B = "Move Big"
-    CHANGE = "Change cats"
+    CHANGE = "Change"
 
     # HOW TO USE
     HOW_TO_USE = ("Commands should be:\n"
@@ -33,7 +32,7 @@ class Boop(Game):
         self.small_pieces_player = {1: 8, 2: 8}
         self.big_pieces_player = {1: 0, 2: 0}
         self.played_pieces_count = {'A': 0, 'B': 0, 'a': 0, 'b': 0}
-        self.next_states = [(Boop.PUT_CAT_A, [])]
+        self.next_states = [create_action_dict(1, Boop.PLACE_CAT, [])]
 
     def game_name(self):
         return "Boop"
@@ -128,7 +127,7 @@ class Boop(Game):
         current_state = self.next_states.pop(0)
 
         # Check if it's a normal move (placing a cat) or a change move
-        if current_state[0] in [Boop.PUT_CAT_A, Boop.PUT_CAT_B]:
+        if current_state["type"] == Boop.PLACE_CAT:
             # Execute a normal move
             row, col = positions[0]
             size = 'small' if mov_type == Boop.MOVE_S else 'big'
@@ -139,7 +138,7 @@ class Boop(Game):
 
         # Update the current player if the game is not over
         if not self.is_game_over():
-            self.current_player = 1 if self.next_states[0][0] in [Boop.PUT_CAT_A, Boop.CHANGE_CATS_A] else 2
+            self.current_player = self.next_states[0]["player"]
 
         return True
 
@@ -267,32 +266,33 @@ class Boop(Game):
             changes (list): List of changes to process.
             letter (str): Letter representing the player ('A' or 'B').
         """
-        t = []
+        change_options = []
         # Separate processing for single and multiple cat changes
         for change in changes:
             change_type, change_positions = change
             if change_type == f'CHANGE_1_{letter}':
                 # For single cat changes, find all positions of the specified letter and prepare change moves
                 change1_pos = self.find_letter_positions(letter)
-                t.extend([(Boop.CHANGE, [pos]) for pos in change1_pos])
-            elif change_type == f'CHANGE_3_{letter}':
-                # For multiple cat changes, prepare change moves directly from the positions
-                t.extend([(Boop.CHANGE, three_pos) for three_pos in change_positions])
+                change_options.extend([[pos] for pos in change1_pos])
+            else:
+                change_options.extend(change_positions)
 
         # If there's only one change move, execute it directly
-        if len(t) == 1:
-            self.make_change_cats_move(t[0][1])
+        if len(change_options) == 1:
+            self.make_change_cats_move(change_options[0])
         # If there are multiple change moves, add them to the next states
-        elif len(t) > 1:
-            next_state = Boop.CHANGE_CATS_A if letter == 'A' else Boop.CHANGE_CATS_B
-            self.next_states.append((next_state, t))
+        elif len(change_options) > 1:
+            player = 1 if letter == 'A' else 2
+            next_state = create_action_dict(player, Boop.CHANGE_CATS, change_options)
+            self.next_states.append(next_state)
 
     def update_next_states(self):
         """
         Updates the next_states attribute based on the current state of the game.
         """
-        next_turn = Boop.PUT_CAT_A if self.current_player == 2 else Boop.PUT_CAT_B
-        self.next_states.append((next_turn, []))
+        player = 1 if self.current_player == 2 else 2
+        next_turn = create_action_dict(player, Boop.PLACE_CAT, [])
+        self.next_states.append(next_turn)
 
     def check_number_pieces(self, letter):
         """
@@ -488,9 +488,9 @@ class Boop(Game):
         state = self.next_states[0]
         available_moves = []
         # Check if it's a player's turn to put a cat
-        if state[0] in [Boop.PUT_CAT_A, Boop.PUT_CAT_B]:
+        if state["type"] == Boop.PLACE_CAT:
 
-            player_number = 1 if state[0] == Boop.PUT_CAT_A else 2
+            player_number = state["player"]
             small_pieces_count = self.small_pieces_player[player_number]
             small_pieces_in_board = self.played_pieces_count['a' if player_number == 1 else 'b']
             big_pieces_count = self.big_pieces_player[player_number]
@@ -505,7 +505,7 @@ class Boop(Game):
                     available_moves.append((Boop.MOVE_B, [space]))
         else:
             # If it's not a turn to put a cat, use the moves from the current state
-            available_moves = state[1]
+            available_moves = [(Boop.CHANGE, option) for option in state["options"]]
 
         return available_moves
 
