@@ -5,16 +5,14 @@ from games.games_utils import adjust_start_position, create_action_dict
 
 
 class Boop(Game):
-    # BOOP TURN TYPE
+    # Constants for types of turns and movements in the game.
     PLACE_CAT = 'Place Cat'
     CHANGE_CATS = 'Change Cats'
-
-    # BOOP MOVEMENTS
     MOVE_S = "Move Small"
     MOVE_B = "Move Big"
     CHANGE = "Change"
 
-    # HOW TO USE
+    # Instructions for user input.
     HOW_TO_USE = ("Commands should be:\n"
                   "- 'ms XY' to move a small piece to position (X,Y). Example: 'ms 12' for position (1,2).\n"
                   "- 'mb XY' to move a big piece to position (X,Y). Example: 'mb 42' for position (4,2).\n"
@@ -25,6 +23,9 @@ class Boop(Game):
                   "Note: X and Y should be single-digit numbers.")
 
     def __init__(self):
+        """
+        Initialize the Boop game with an empty board and setup initial game state.
+        """
         self.board = [[' ' for _ in range(6)] for _ in range(6)]
         self.current_player = 1
         self.winner = None
@@ -35,23 +36,42 @@ class Boop(Game):
         self.next_states = [create_action_dict(1, Boop.PLACE_CAT, [])]
 
     def game_name(self):
+        """
+        Return the name of the game.
+        """
         return "Boop"
 
     def get_current_player(self):
+        """
+        Get the current player's number.
+        """
         return self.current_player
 
     def get_winner(self):
+        """
+        Get the winner of the game, if there is one.
+        """
         return self.winner
 
     def process_user_input(self, user_input):
+        """
+        Process user input and return the corresponding move.
+
+        Parameters:
+            user_input (str): The user's input command.
+
+        Returns:
+            tuple: A tuple representing the move type and associated positions.
+
+        Raises:
+            ValueError: If the input format is incorrect or coordinates are not numbers.
+        """
         parts = user_input.split()
 
         if len(parts) < 2:
-            raise ValueError("Invalid format. Include an action and a coordinate\n"
-                             f"{Boop.HOW_TO_USE}")
+            raise ValueError("Invalid format. Include an action and a coordinate\n" + Boop.HOW_TO_USE)
 
-        action = parts[0]
-        coordinates = parts[1]
+        action, coordinates = parts[0], parts[1]
 
         if not coordinates.isdigit():
             raise ValueError("Coordinates should be numbers")
