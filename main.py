@@ -121,7 +121,7 @@ def choose_player_type(player_number):
                 time_limit = choose_depth_or_time(player_number, 'time')
                 return MCTSPlayer(time_limit, player=player_number)
             elif choice == 5:
-                # MCTS Player
+                # MCTS Solver Player
                 time_limit = choose_depth_or_time(player_number, 'time')
                 return MCTSSolverPlayer(time_limit, player=player_number)
             else:

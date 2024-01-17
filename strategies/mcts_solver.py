@@ -111,6 +111,8 @@ class MCTSSolverPlayer(BotPlayer):
             node = self.root
             temp_game = game.copy(track_previous_state=False)
 
+            depth = 0
+
             # Selection
             while node.is_fully_expanded() and not temp_game.is_game_over():
                 node = node.best_child()
@@ -125,7 +127,10 @@ class MCTSSolverPlayer(BotPlayer):
 
             # Simulation
             while not temp_game.is_game_over():
+                depth += 1
                 temp_game.make_move(random.choice(temp_game.get_available_moves()))
+                if depth > 49:
+                    break
 
             # Backpropagation
             game_result = temp_game.evaluate_game_state(self.player)
