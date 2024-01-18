@@ -553,9 +553,10 @@ class Boop(Game):
         if self.winner:
             return 1 if self.winner == player else -1
         else:
-            opponent = 1 if player == 2 else 1
-            player_points = 0.1 * self.big_pieces_player[player]
-            opponent_points = 0.1 * self.big_pieces_player[opponent]
+            (player_letter, opponent_letter) = ('A', 'B') if player == 1 else ('B', 'A')
+            player_points = 0.1 * self.played_pieces_count[player_letter]
+            opponent_points = 0.1 * self.played_pieces_count[opponent_letter]
+
             return player_points - opponent_points
 
     def next_player(self):
