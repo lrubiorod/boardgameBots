@@ -12,6 +12,16 @@ class Boop(Game):
     MOVE_B = "Move Big"
     CHANGE = "Change"
 
+    LETTER_DICT = {'a': (1, 'small'),
+                   'A': (1, 'big'),
+                   'b': (2, 'small'),
+                   'B': (2, 'big')}
+
+    PLAYER_DICT = {(1, 'small'): 'a',
+                   (1, 'big'): 'A',
+                   (2, 'small'): 'b',
+                   (2, 'big'): 'B'}
+
     # Instructions for user input.
     HOW_TO_USE = ("Commands should be:\n"
                   "- 'ms XY' to move a small piece to position (X,Y). Example: 'ms 12' for position (1,2).\n"
@@ -30,9 +40,10 @@ class Boop(Game):
         self.current_player = 1
         self.winner = None
         self.previous_state = None
-        self.small_pieces_player = {1: 8, 2: 8}
-        self.big_pieces_player = {1: 0, 2: 0}
-        self.played_pieces_count = {'A': 0, 'B': 0, 'a': 0, 'b': 0}
+        self.player_pieces = {
+            1: {'small': 8, 'big': 0, 'played_small': 0, 'played_big': 0},
+            2: {'small': 8, 'big': 0, 'played_small': 0, 'played_big': 0}
+        }
         self.next_states = [create_action_dict(1, Boop.PLACE_CAT, [])]
         self.track_previous_state = True
 
@@ -94,9 +105,7 @@ class Boop(Game):
         new_game.board = [row[:] for row in self.board]
         new_game.current_player = self.current_player
         new_game.winner = self.winner
-        new_game.small_pieces_player = self.small_pieces_player.copy()
-        new_game.big_pieces_player = self.big_pieces_player.copy()
-        new_game.played_pieces_count = self.played_pieces_count.copy()
+        new_game.player_pieces = copy.deepcopy(self.player_pieces)
         new_game.next_states = copy.deepcopy(self.next_states)  # Deep copy
 
         new_game.track_previous_state = track_previous_state
@@ -112,10 +121,13 @@ class Boop(Game):
         for i, row in enumerate(self.board):
             print(f"{i} | " + ' | '.join(row) + ' |')
         print()
-        n_a = self.small_pieces_player[1] - self.played_pieces_count['a']
-        n_b = self.small_pieces_player[2] - self.played_pieces_count['b']
-        n_A = self.big_pieces_player[1] - self.played_pieces_count['A']
-        n_B = self.big_pieces_player[2] - self.played_pieces_count['B']
+        player_pieces_1 = self.player_pieces[1]
+        player_pieces_2 = self.player_pieces[2]
+
+        n_a = player_pieces_1['small'] - player_pieces_1['played_small']
+        n_b = player_pieces_2['small'] - player_pieces_2['played_small']
+        n_A = player_pieces_1['big'] - player_pieces_1['played_big']
+        n_B = player_pieces_2['big'] - player_pieces_2['played_big']
         print(f'Rest of pieces-> a: {n_a}, A: {n_A}, b: {n_b}, B: {n_B}')
         print(f'Current winner: {self.winner}')
 
@@ -192,19 +204,19 @@ class Boop(Game):
             col (int): The column of the cat to upgrade.
         """
         letter = self.board[row][col]
-        self.played_pieces_count[letter] -= 1
+
+        # Determine the player number and size based on the letter
+        player, size = Boop.LETTER_DICT[letter]
+        self.player_pieces[player][f'played_{size}'] -= 1
 
         # Remove the small cat from the board
         self.board[row][col] = ' '
 
-        # Determine the player number based on the letter
-        player_number = 1 if letter.lower() == 'a' else 2
-
         # Update the counts of small and big pieces for the respective player
         # Only if the piece is a small piece (lowercase letter)
         if letter.islower():
-            self.small_pieces_player[player_number] -= 1
-            self.big_pieces_player[player_number] += 1
+            self.player_pieces[player]['small'] -= 1
+            self.player_pieces[player]['big'] += 1
 
     def make_normal_move(self, row, col, size):
         """
@@ -217,9 +229,9 @@ class Boop(Game):
             size (str): Size of the piece ('small' or 'big').
         """
         # Determine the letter for the current player's piece
-        letter = ('a' if size == 'small' else 'A') if self.current_player == 1 else ('b' if size == 'small' else 'B')
+        letter = Boop.PLAYER_DICT[(self.current_player, size)]
         self.board[row][col] = letter
-        self.played_pieces_count[letter] += 1
+        self.player_pieces[self.current_player][f'played_{size}'] += 1
 
         # Shift adjacent pieces and check for wins or changes
         shifted_pieces = self.shift_adjacent_pieces(row, col)
@@ -334,11 +346,12 @@ class Boop(Game):
         """
 
         # If a player has placed all big pieces on the board, it's a win
-        if letter.isupper() and (self.played_pieces_count[letter] == 8):
+        player, size = Boop.LETTER_DICT[letter]
+        if self.player_pieces[player]['played_big'] == 8:
             return f'WIN_{letter.upper()}'
 
         # If the combined count of small and big pieces reaches 8, it's time to change small to big pieces
-        elif self.played_pieces_count[letter.upper()] + self.played_pieces_count[letter.lower()] == 8:
+        elif self.player_pieces[player]['played_small'] + self.player_pieces[player]['played_big'] == 8:
             return f'CHANGE_1_{letter.upper()}'
 
         # Otherwise, there's no special condition to address
@@ -400,9 +413,9 @@ class Boop(Game):
         # Case when the target position is off the board
         if not (0 <= target_row < 6 and 0 <= target_col < 6):
             fallen_piece = self.board[row][col]
+            player, size = Boop.LETTER_DICT[fallen_piece]
             self.board[row][col] = ' '
-            if fallen_piece in self.played_pieces_count:
-                self.played_pieces_count[fallen_piece] -= 1
+            self.player_pieces[player][f'played_{size}'] -= 1
             return None
 
         # Case when the target position is empty on the board
@@ -422,9 +435,7 @@ class Boop(Game):
             self.current_player = previous_state.current_player
             self.winner = previous_state.winner
             self.previous_state = previous_state.previous_state
-            self.small_pieces_player = previous_state.small_pieces_player
-            self.big_pieces_player = previous_state.big_pieces_player
-            self.played_pieces_count = previous_state.played_pieces_count
+            self.player_pieces = previous_state.player_pieces
             self.next_states = previous_state.next_states
 
     def check_three(self, last_move):
@@ -518,10 +529,10 @@ class Boop(Game):
         if state["type"] == Boop.PLACE_CAT:
 
             player_number = state["player"]
-            small_pieces_count = self.small_pieces_player[player_number]
-            small_pieces_in_board = self.played_pieces_count['a' if player_number == 1 else 'b']
-            big_pieces_count = self.big_pieces_player[player_number]
-            big_pieces_in_board = self.played_pieces_count['A' if player_number == 1 else 'B']
+            small_pieces_count = self.player_pieces[player_number]['small']
+            small_pieces_in_board = self.player_pieces[player_number]['played_small']
+            big_pieces_count = self.player_pieces[player_number]['big']
+            big_pieces_in_board = self.player_pieces[player_number]['played_big']
 
             for space in self.get_available_spaces():
                 # Check if small pieces are available and append move
@@ -553,9 +564,9 @@ class Boop(Game):
         if self.winner:
             return 1 if self.winner == player else -1
         else:
-            (player_letter, opponent_letter) = ('A', 'B') if player == 1 else ('B', 'A')
-            player_points = 0.1 * self.played_pieces_count[player_letter]
-            opponent_points = 0.1 * self.played_pieces_count[opponent_letter]
+            opponent = 1 if player == 2 else 1
+            player_points = 0.1 * self.player_pieces[player]['played_big']
+            opponent_points = 0.1 * self.player_pieces[opponent]['played_big']
 
             return player_points - opponent_points
 
