@@ -105,7 +105,7 @@ class Boop(Game):
         new_game.board = [row[:] for row in self.board]
         new_game.current_player = self.current_player
         new_game.winner = self.winner
-        new_game.player_pieces = copy.deepcopy(self.player_pieces)
+        new_game.player_pieces = copy.deepcopy(self.player_pieces)  # Deep copy
         new_game.next_states = copy.deepcopy(self.next_states)  # Deep copy
 
         new_game.track_previous_state = track_previous_state
@@ -117,10 +117,17 @@ class Boop(Game):
         return new_game
 
     def print_board(self):
+        """
+        Prints the current state of the game board in a readable format.
+        Displays the board with the positions of the pieces and shows the remaining pieces for each player.
+        """
+        # Print the board with row and column headers
         print('    0   1   2   3   4   5')
         for i, row in enumerate(self.board):
             print(f"{i} | " + ' | '.join(row) + ' |')
         print()
+
+        # Retrieve and calculate the number of remaining pieces for each player
         player_pieces_1 = self.player_pieces[1]
         player_pieces_2 = self.player_pieces[2]
 
@@ -128,6 +135,8 @@ class Boop(Game):
         n_b = player_pieces_2['small'] - len(player_pieces_2['played_small'])
         n_A = player_pieces_1['big'] - len(player_pieces_1['played_big'])
         n_B = player_pieces_2['big'] - len(player_pieces_2['played_big'])
+
+        # Print the remaining pieces and the current winner (if any)
         print(f'Rest of pieces-> a: {n_a}, A: {n_A}, b: {n_b}, B: {n_B}')
         print(f'Current winner: {self.winner}')
 
@@ -240,83 +249,82 @@ class Boop(Game):
         self.player_pieces[self.current_player][f'played_{size}'].append((row, col))
 
         # Shift adjacent pieces and check for wins or changes
-        shifted_pieces = self.shift_adjacent_pieces(row, col)
-        self.process_shift_results(shifted_pieces + [[row, col]], letter)
+        self.shift_adjacent_pieces(row, col)
+        self.process_results(self.get_player_positions(self.current_player))
 
         # Update the next states based on current game status
         self.update_next_states()
 
-    def process_shift_results(self, positions, letter):
+    def process_results(self, positions):
         """
         Processes the results of shifting pieces, checking for wins or necessary changes.
-        This function evaluates each shifted position for potential winning conditions or
-        the need for changes (like upgrading small pieces to big ones).
-
-        Parameters:
-            positions (list): List of positions to check after pieces have been shifted.
-            letter (str): The letter representing the player who made the last move.
+        Evaluates each position of the current player's pieces for potential winning conditions
+        or the need for changes, such as upgrading small pieces to big ones.
         """
-        # Check the number of pieces on the board for the current player
-        result = self.check_number_pieces(letter)
-        winner_a, winner_b = result == 'WIN_A', result == 'WIN_B'
-        possible_changes_a, possible_changes_b = [], []
+        winner = False
+        possible_changes = []
 
-        # Append possible changes if a change condition is met
-        if result == 'CHANGE_1_A':
-            possible_changes_a.append((result, []))
-        elif result == 'CHANGE_1_B':
-            possible_changes_b.append((result, []))
+        current_player_pieces = self.player_pieces[self.current_player]
+        played_pieces_count = len(current_player_pieces['played_small']) + len(current_player_pieces['played_big'])
 
-        # Process each position for potential three-in-line patterns
-        if not winner_a or not winner_b:
-            for pos in positions:
-                three_result = self.check_three(pos)
-                if three_result[0] == 'WIN_A':
-                    winner_a = True
-                elif three_result[0] == 'WIN_B':
-                    winner_b = True
-                elif three_result[0] == 'CHANGE_3_A':
-                    possible_changes_a.append(three_result)
-                elif three_result[0] == 'CHANGE_3_B':
-                    possible_changes_b.append(three_result)
+        if played_pieces_count >= 3:
+            result = self.check_number_pieces()
+            winner = result == 'WIN'
 
-        self.update_game_status(winner_a, winner_b, possible_changes_a, possible_changes_b)
+            if result == 'CHANGE_1':
+                possible_changes.append((result, []))
 
-    def update_game_status(self, winner_a, winner_b, changes_a, changes_b):
+            three_changes = []
+            if not winner:
+                for pos in positions:
+                    three_result = self.check_three(pos, played_pieces_count)
+                    if three_result[0] == 'WIN':
+                        winner = True
+                    elif three_result[0] == 'CHANGE_3':
+                        for change_vec in three_result[1]:
+                            if change_vec not in three_changes:
+                                three_changes.append(change_vec)
+
+            if three_changes:
+                possible_changes.append(('CHANGE_3', three_changes))
+
+        self.update_game_status(winner, possible_changes)
+
+    def update_game_status(self, winner, changes):
         """
         Updates the game status based on the results of the last move.
 
         Parameters:
-            winner_a (bool): Whether player A has won.
-            winner_b (bool): Whether player B has won.
-            changes_a (list): List of possible changes for player A.
-            changes_b (list): List of possible changes for player B.
-        """
-        if winner_a and winner_b:
-            self.winner = 0
-        elif winner_a:
-            self.winner = 1
-        elif winner_b:
-            self.winner = 2
-        else:
-            self.prepare_next_state_changes(changes_a, 'A')
-            self.prepare_next_state_changes(changes_b, 'B')
+            winner (bool): Indicates whether the current player has won.
+            changes (list): List of possible changes for the current player.
 
-    def prepare_next_state_changes(self, changes, letter):
+        Description:
+        - If there is a winner, updates the winner of the game.
+        - If no winner but there are changes, prepares the next state changes.
+        """
+        if winner:
+            self.winner = self.current_player
+        else:
+            self.prepare_next_state_changes(changes)
+
+    def prepare_next_state_changes(self, changes):
         """
         Prepares the next state changes based on the current game status.
-        It handles both single and multiple cat change scenarios.
+        Handles scenarios for single and multiple cat changes.
 
         Parameters:
-            changes (list): List of changes to process.
-            letter (str): Letter representing the player ('A' or 'B').
+            changes (list): List of changes to process for the current player.
+
+        Description:
+        - Processes the changes and either makes the change directly (if only one option)
+          or updates the next_states for the player to choose from (if multiple options).
         """
         change_options = []
         # Separate processing for single and multiple cat changes
         for change in changes:
             change_type, change_positions = change
-            if change_type == f'CHANGE_1_{letter}':
-                # For single cat changes, find all positions of the specified player and prepare change moves
+            if change_type == 'CHANGE_1':
+                # For single cat changes, find all positions of the specified letter and prepare change moves
                 change1_pos = self.get_player_positions(self.current_player)
                 change_options.extend([[pos] for pos in change1_pos])
             else:
@@ -327,8 +335,7 @@ class Boop(Game):
             self.make_change_cats_move(change_options[0])
         # If there are multiple change moves, add them to the next states
         elif len(change_options) > 1:
-            player = 1 if letter == 'A' else 2
-            next_state = create_action_dict(player, Boop.CHANGE_CATS, change_options)
+            next_state = create_action_dict(self.current_player, Boop.CHANGE_CATS, change_options)
             self.next_states.append(next_state)
 
     def update_next_states(self):
@@ -339,26 +346,24 @@ class Boop(Game):
         next_turn = create_action_dict(player, Boop.PLACE_CAT, [])
         self.next_states.append(next_turn)
 
-    def check_number_pieces(self, letter):
+    def check_number_pieces(self):
         """
-        Checks the number of pieces for a specific player on the board to determine game status.
-        It determines if a player has won, if a change of pieces (small to big) is needed, or if there is no special action required.
-
-        Parameters:
-            letter (str): The letter representing the player (either upper or lower case).
+        Checks the number of pieces for the current player on the board to determine game status.
+        Determines if the current player has won, if a change of pieces from small to big is needed, or if no special action is required.
 
         Returns:
-            str: A string indicating the game status: 'WIN', 'CHANGE_1', or 'NOTHING'.
+            str: A string indicating the game status: 'WIN' if all big pieces are placed,
+                 'CHANGE_1' if the total count of small and big pieces is 8, or 'NOTHING' otherwise.
         """
+        player_pieces = self.player_pieces[self.current_player]
 
         # If a player has placed all big pieces on the board, it's a win
-        player, size = Boop.LETTER_DICT[letter]
-        if len(self.player_pieces[player]['played_big']) == 8:
-            return f'WIN_{letter.upper()}'
+        if len(player_pieces['played_big']) == 8:
+            return 'WIN'
 
         # If the combined count of small and big pieces reaches 8, it's time to change small to big pieces
-        elif len(self.player_pieces[player]['played_small']) + len(self.player_pieces[player]['played_big']) == 8:
-            return f'CHANGE_1_{letter.upper()}'
+        elif len(player_pieces['played_small']) + len(player_pieces['played_big']) == 8:
+            return 'CHANGE_1'
 
         # Otherwise, there's no special condition to address
         else:
@@ -372,9 +377,6 @@ class Boop(Game):
         Parameters:
             row (int): The row of the played piece.
             col (int): The column of the played piece.
-
-        Returns:
-            list: A list of new positions where adjacent pieces were moved.
         """
 
         played_letter = self.board[row][col]
@@ -387,8 +389,7 @@ class Boop(Game):
                           and self.board[row + dr][col + dc] != ' '
                           and is_bigger_piece(played_letter, self.board[row + dr][col + dc])]
 
-        # Filter out None values (cases where no shift occurred)
-        return [pos for pos in shifted_pieces if pos]
+        return
 
     def shift_piece(self, row, col, dr, dc):
         """
@@ -441,7 +442,7 @@ class Boop(Game):
             self.player_pieces = previous_state.player_pieces
             self.next_states = previous_state.next_states
 
-    def check_three(self, last_move):
+    def check_three(self, position, n_pieces):
         """
         Checks if the last move leads to a win, a change, or neither.
         Evaluates lines (rows, columns, diagonals) from the last move for three consecutive cats.
@@ -450,11 +451,13 @@ class Boop(Game):
             A tuple indicating either a win, a change of three small cats to big cats, or none.
             For wins and changes, it also returns the positions of the cats involved.
         """
-        row, col = last_move
+        row, col = position
         max_count = 3
-        letter = self.board[row][col]
-
         possible_changes = []
+
+        # Optimization:
+        if n_pieces > 4 and not (row in [1, 4] or col in [1, 4]):
+            return 'NOTHING'
 
         # Check all directions from the last move: rows, columns, diagonals
         directions = [
@@ -466,18 +469,19 @@ class Boop(Game):
 
         for dr, dc in directions:
             start_row, start_col = adjust_start_position(row, col, dr, dc, max_count)
-            result = self.has_three_in_line(start_row, start_col, dr, dc, letter, max_count)
+            result = self.has_three_in_line(start_row, start_col, dr, dc, max_count)
 
-            if result[0] == f'WIN_{letter.upper()}':
+            if result[0] == 'WIN':
                 return result
-            elif result[0] == f'CHANGE_3_{letter.upper()}':
-                possible_changes.extend(result[1])
+            elif result[0] == 'CHANGE_3':
+                if result[1] not in possible_changes:
+                    possible_changes.extend(result[1])
 
         if possible_changes:
-            return f'CHANGE_3_{letter.upper()}', possible_changes
-        return 'NONE', []
+            return 'CHANGE_3', possible_changes
+        return 'NOTHING'
 
-    def has_three_in_line(self, start_row, start_col, delta_row, delta_col, letter, max_count):
+    def has_three_in_line(self, start_row, start_col, delta_row, delta_col, max_count):
         """Checks a line for a three-in-line condition. Evaluates both small and big cats.
         If three big cats are in line, it's a win. If three cats in line but not all are big,
         it marks a possible change from small to big cats."""
@@ -485,6 +489,7 @@ class Boop(Game):
         big_count = 0
         three_pos = []
         possible_changes = []
+        letter = Boop.PLAYER_DICT[(self.current_player, 'small')]
 
         row, col = start_row, start_col
         for _ in range(max_count + 2):
@@ -498,7 +503,7 @@ class Boop(Game):
 
                     if count == max_count:
                         if big_count == max_count:
-                            return f'WIN_{letter.upper()}', three_pos  # Win condition with all big cats
+                            return 'WIN', three_pos  # Win condition with all big cats
                         possible_changes.append(three_pos.copy())  # Potential change with small cats
                         r, c = three_pos.pop(0)
                         if self.board[r][c] == letter.upper():
@@ -512,7 +517,7 @@ class Boop(Game):
             col += delta_col
 
         if possible_changes:
-            return f'CHANGE_3_{letter.upper()}', possible_changes
+            return 'CHANGE_3', possible_changes
         return 'NONE', []  # No three-in-line found
 
     def get_available_moves(self):
