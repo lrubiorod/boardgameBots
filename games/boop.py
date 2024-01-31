@@ -131,10 +131,18 @@ class Boop(Game):
         print(f'Rest of pieces-> a: {n_a}, A: {n_A}, b: {n_b}, B: {n_B}')
         print(f'Current winner: {self.winner}')
 
-    def find_letter_positions(self, letter):
-        player, _size = Boop.LETTER_DICT[letter]
+    def get_player_positions(self, player):
+        """
+        Retrieves all positions (both small and big pieces) for a given player.
 
-        combined_positions = self.player_pieces[player]['played_small'] + self.player_pieces[player]['played_big']
+        Parameters:
+            player (int): The player number (1 or 2).
+
+        Returns:
+           list: A combined list of tuples representing the positions of both small and big pieces for the player.
+        """
+        player_data = self.player_pieces[player]
+        combined_positions = player_data['played_small'] + player_data['played_big']
 
         return combined_positions
 
@@ -308,8 +316,8 @@ class Boop(Game):
         for change in changes:
             change_type, change_positions = change
             if change_type == f'CHANGE_1_{letter}':
-                # For single cat changes, find all positions of the specified letter and prepare change moves
-                change1_pos = self.find_letter_positions(letter)
+                # For single cat changes, find all positions of the specified player and prepare change moves
+                change1_pos = self.get_player_positions(self.current_player)
                 change_options.extend([[pos] for pos in change1_pos])
             else:
                 change_options.extend(change_positions)
