@@ -122,8 +122,9 @@ def choose_player_type(player_number):
                 return MCTSPlayer(time_limit, player=player_number)
             elif choice == 5:
                 # MCTS Solver Player
+                depth_limit = choose_depth_or_time(player_number, 'depth')
                 time_limit = choose_depth_or_time(player_number, 'time')
-                return MCTSSolverPlayer(time_limit, player=player_number)
+                return MCTSSolverPlayer(depth_limit, time_limit, player=player_number)
             else:
                 print("Invalid choice. Please try again.")
         except ValueError:

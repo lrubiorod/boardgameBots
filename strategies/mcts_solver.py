@@ -87,8 +87,9 @@ class MCTSNode:
 
 
 class MCTSSolverPlayer(BotPlayer):
-    def __init__(self, time_limit=5, player=2):
+    def __init__(self, depth_limit=50, time_limit=5, player=2):
         self.time_limit = time_limit
+        self.depth_limit = depth_limit
         self.player = player
         self.root = None
 
@@ -129,7 +130,7 @@ class MCTSSolverPlayer(BotPlayer):
             while not temp_game.is_game_over():
                 depth += 1
                 temp_game.make_move(random.choice(temp_game.get_available_moves()))
-                if depth > 49:
+                if depth > self.depth_limit:
                     break
 
             # Backpropagation
