@@ -1,7 +1,7 @@
 import copy
 
 from game import Game
-from games.games_utils import adjust_start_position, create_action_dict
+from games.games_utils import adjust_start_position, create_action_dict, is_bigger_piece
 
 
 class Boop(Game):
@@ -376,13 +376,6 @@ class Boop(Game):
         Returns:
             list: A list of new positions where adjacent pieces were moved.
         """
-
-        def is_bigger_piece(first, second):
-            """
-            Determines if the first piece is bigger or equal than the second.
-            A piece is considered bigger if it's uppercase.
-            """
-            return first.isupper() or not second.isupper()
 
         played_letter = self.board[row][col]
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]

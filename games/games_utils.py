@@ -42,3 +42,11 @@ def create_action_dict(player, action_type, options):
         "type": action_type,
         "options": options,
     }
+
+
+def is_bigger_piece(first, second):
+    """
+    Determines if the first piece is bigger or equal than the second.
+    A piece is considered bigger if it's uppercase.
+    """
+    return first.isupper() or not second.isupper()
